@@ -77,7 +77,9 @@ Timer Script is a powerful script for Adobe After Effects designed to help users
     - Hover over any button or interface element to see a detailed description of its function.
 
 ## Note
-If you leave the script open when closing Adobe After Effects and later reopen After Effects with the script still open, it **might not load** the previously saved information correctly. To ensure that all data loads properly, it is recommended to **close the script panel and reopen it** after launching Adobe After Effects.
+If you leave the script open when closing Adobe After Effects and later reopen After Effects with the script still open, it **might not load** the previously saved information correctly. To ensure that all data loads properly, you can click the **Refresh** button to reload the saved timer data, or alternatively, close and reopen the script panel after launching Adobe After Effects.
+
+When switching between projects, it's recommended to pause the timer first. If you try to open another project by double-clicking it in the Recent Projects list while the timer is running, the script will display a warning message saying "Please pause the current project timer before switching to another project" along with details about the current project name and elapsed time. This warning helps prevent timing conflicts. The same caution applies when opening projects through File -> Open Project... or from the Home window (the default window showing recently opened After Effects projects). Pausing the timer ensures accurate time tracking between project switches.
 
 ## Version History
 

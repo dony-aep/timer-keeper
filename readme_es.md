@@ -77,7 +77,9 @@ Timer Script es un potente script para Adobe After Effects diseñado para ayudar
     - Pasa el cursor sobre cualquier botón o elemento de la interfaz para ver una descripción detallada de su función.
 
 ## Nota
-Si dejas el script abierto al cerrar Adobe After Effects y luego vuelves a abrir After Effects con el script aún abierto, **podría no cargar** la información guardada previamente correctamente. Para asegurar que todos los datos se carguen adecuadamente, se recomienda **cerrar el panel del script y volver a abrirlo** después de iniciar Adobe After Effects.
+Si dejas el script abierto al cerrar Adobe After Effects y luego vuelves a abrir After Effects con el script aún abierto, **podría no cargar** la información guardada previamente correctamente. Para asegurar que todos los datos se carguen adecuadamente, puedes hacer clic en el botón **Refresh** para recargar los datos guardados del temporizador, o alternativamente, cerrar y volver a abrir el panel del script después de iniciar Adobe After Effects.
+
+Al cambiar entre proyectos, se recomienda pausar el temporizador primero. Si intentas abrir otro proyecto haciendo doble clic en él en la lista de Proyectos Recientes mientras el temporizador está corriendo, el script mostrará un mensaje de advertencia diciendo "Por favor pausa el temporizador del proyecto actual antes de cambiar a otro proyecto" junto con detalles sobre el nombre del proyecto actual y el tiempo transcurrido. Esta advertencia ayuda a prevenir conflictos de temporización. La misma precaución aplica cuando se abren proyectos a través de Archivo -> Abrir Proyecto... o desde la ventana de Inicio (la ventana predeterminada que muestra los proyectos recientemente abiertos de After Effects). Pausar el temporizador asegura un seguimiento preciso del tiempo entre cambios de proyecto.
 
 ## Historial de Versiones
 
