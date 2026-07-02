@@ -1,0 +1,18 @@
+.icon {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 380,
+    'GRAD' 0,
+    'opsz' 24;
+  transition: font-variation-settings var(--dur-3) var(--ease-out);
+  flex: none;
+  user-select: none;
+}
+
+.filled {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 380,
+    'GRAD' 0,
+    'opsz' 24;
+}

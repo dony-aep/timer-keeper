@@ -1,0 +1,65 @@
+/* ============================================================
+   StatCard — instrument readout tile.
+   ============================================================ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px 13px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+}
+
+/* Header row: icon on the left, label to its right. */
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.icon {
+  color: var(--ink-lo);
+  flex: none;
+}
+
+.label {
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 620;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--ink-lo);
+}
+
+.value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-variation-settings: 'wght' 560;
+  /* Scales down on narrow panels so HH:MM:SS readouts don't clip in a
+     ~80px-wide card, then settles at 18px once there's room. */
+  font-size: clamp(14px, 4.5vw, 18px);
+  color: var(--ink-hi);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sublabel {
+  font-size: 10px;
+  color: var(--ink-lo);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Below 300px the cards stack full-width (see DashboardTab), so there's plenty
+   of room — restore the full readout size instead of the cramped 3-up clamp. */
+@media (max-width: 300px) {
+  .value {
+    font-size: 18px;
+  }
+}

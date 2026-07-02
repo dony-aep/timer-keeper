@@ -1,0 +1,9 @@
+/* ============================================================
+   Timer Keeper — self-hosted fonts (no external requests).
+   - Google Sans Flex (variable, wght 1..1000) via @fontsource.
+   - Material Symbols, OUTLINED variant only (FILL axis animated
+     0 -> 1 on the transport key while the timer runs).
+   ============================================================ */
+
+@import '@fontsource-variable/google-sans-flex';
+@import 'material-symbols/outlined.css';

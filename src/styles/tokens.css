@@ -1,0 +1,56 @@
+/* ============================================================
+   Timer Keeper — design tokens
+   "Studio chronometer": strict cold-grey monochrome, instrumental.
+   Every colour in the UI must come from this ramp. State is
+   communicated with icon + luminance + motion — never hue.
+   Pure white (--ink-max) is reserved EXCLUSIVELY for the timer
+   display while it is running.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Surfaces (darkest -> most elevated) --- */
+  --surface-0: #141414; /* app background            */
+  --surface-1: #1e1e1e; /* panels / cards            */
+  --surface-2: #262626; /* controls / rows / toasts  */
+  --surface-3: #2e2e2e; /* hover / raised states     */
+
+  /* --- Hairlines --- */
+  --line: #333333;
+  --line-strong: #454545;
+
+  /* --- Ink --- */
+  --ink-hi: #e8e8e8;
+  --ink-mid: #9a9a9a;
+  --ink-lo: #6b6b6b;
+  --ink-max: #ffffff; /* RUNNING timer digits ONLY */
+
+  /* --- Inverted key (primary action) --- */
+  --key-bg: #e8e8e8;
+  --key-bg-hover: #f4f4f4;
+  --key-ink: #141414;
+
+  /* --- Grayscale alpha veils --- */
+  --scrim: rgba(0, 0, 0, 0.66);
+  --veil-hover: rgba(232, 232, 232, 0.06);
+  --veil-press: rgba(232, 232, 232, 0.1);
+  --shadow-drop: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+  /* --- Typography (single family, hierarchy via variable axes) --- */
+  --font-sans: 'Google Sans Flex Variable', system-ui, -apple-system, sans-serif;
+
+  /* --- Shape --- */
+  --radius-1: 6px; /* rows, inputs, small controls, buttons */
+  --radius-2: 10px; /* cards, panels, modals, toasts        */
+  --radius-3: 14px; /* hero surfaces (running timer display) */
+
+  /* --- Focus --- */
+  --focus-ring: 1px solid var(--ink-hi);
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 360ms;
+}

@@ -1,156 +1,112 @@
-# Timer Script by dony.
+# Timer Keeper by dony.
+
+[![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
+[![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
+[![Version](https://img.shields.io/badge/version-4.0.0-white.svg)](CHANGELOG.md)
+[![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibility)
+[![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibility)
+[![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#tech-stack)
+[![License](https://img.shields.io/badge/license-see%20LICENSE-lightgrey.svg)](LICENSE)
+
+> **[Leer en Español](README_ES.md) | Read in English**
 
 ## Description
-Timer Script is a powerful script for Adobe After Effects designed to help users track and manage the time spent on individual projects. Whether you're working on multiple compositions or juggling several projects simultaneously, this script provides an intuitive interface to monitor your workflow efficiently. By keeping a detailed log of your active projects, Timer Script enhances productivity and ensures you stay on top of your deadlines.
+Timer Keeper is an Adobe After Effects extension that tracks the time you spend on each project. It watches which project is open, keeps a per-project (and per-day) log of accumulated time, and gives you a monochrome dashboard to see where your hours actually went — no manual stopwatch, no spreadsheets.
+
+Formerly distributed as "AE TimerKeeper", the extension has been rebuilt from the ground up as **Timer Keeper**.
 
 ## Current Version
-**v2.0** - Complete UI redesign with enhanced functionality, robust error handling and comprehensive user feedback system.
+**v4.0.0** - Complete rewrite: migrated to a modern, modular architecture (React + TypeScript, bundled with Vite), a new monochrome "instrument" design, real per-day time tracking, and several v3 bugs fixed. See [CHANGELOG.md](CHANGELOG.md).
+
+## What's New in v4.0.0
+- **Rebuilt from the ground up** on a modular React + TypeScript codebase (bundled with Vite), replacing the previous single-file panel — easier to maintain and extend.
+- **Rebranded**: "AE TimerKeeper" is now **Timer Keeper**, with a new extension ID and panel name.
+- **Monochrome "instrument" UI**: no color accents — state is shown through icon, luminance, and subtle motion (a pulsing colon while the timer runs, an animating Start/Pause key).
+- **Real "Today" tracking**: the Dashboard's daily total now reflects actual time logged today (previously a hardcoded placeholder), backed by a new per-day data schema.
+- **Dashboard redesigned**: the colored donut chart was replaced with a monochrome horizontal bar distribution, plus stat cards and a Top 5 / All toggle.
+- **Bug fixes carried over from v3**: the time-format toggle no longer crashes, the flyout menu no longer runs actions twice, toast notifications no longer double-fire or use the wrong style, and the host/panel time formatting is unified into a single implementation.
+- **Fully offline**: fonts (Google Sans Flex) and icons (Material Symbols) are bundled locally — no CDN requests.
+- **Updated compatibility:** now targets After Effects 2022 (22.0) and newer.
 
 ## Installation
-1. **Locate the After Effects ScriptUI Panels Folder:**
+
+### For users (prebuilt extension)
+1. Locate the Adobe After Effects CEP Extensions folder:
    ```
-   C:\Program Files\Adobe\Adobe After Effects [Version]\Support Files\Scripts\ScriptUI Panels
+   C:\Program Files (x86)\Common Files\Adobe\CEP\extensions
    ```
-2. **Place the Script File:**
-   - Copy the `TimerScript.jsx` file into the `ScriptUI Panels` folder.
-3. **Access the Script in After Effects:**
-   - Open Adobe After Effects.
-   - Navigate to `Window > TimerScript.jsx` to launch the panel.
+   (or, per user: `%APPDATA%\Adobe\CEP\extensions`)
+2. Place the entire built extension folder (`com.donyaep.TimerKeeper`) in this directory.
+3. Launch After Effects and open the extension via **Window > Extensions > Timer Keeper**.
+
+> If you previously installed "AE TimerKeeper" (`com.dony.aetimerkeeper`), remove it from both CEP extensions folders — the new extension uses a different ID and is treated as a separate install. Your tracked time is not lost: it lives in `Documents/Adobe/TimerData/` and is migrated automatically on first load.
+
+> Unsigned development builds require enabling CEP debug mode once:
+> ```
+> reg add "HKCU\Software\Adobe\CSXS.11" /v PlayerDebugMode /t REG_SZ /d 1 /f
+> ```
+
+### For developers (build from source)
+Requires **Node.js 20.19+ or 22.12+** (Vite 8 requirement).
+
+```bash
+npm install        # install dependencies
+npm run dev        # start the Vite dev server (browser preview)
+npm run build      # type-check + production build to dist/
+npm run deploy     # build + copy to %APPDATA%\Adobe\CEP\extensions (local install)
+npm run package    # build + zip dist/ into releases/ for distribution
+```
+
+After `npm run deploy`, restart After Effects to load the updated panel.
+
+## Tech Stack
+- **React 19** + **TypeScript** UI, bundled with **Vite** (`build.target: chrome88`).
+- **react-aria-components** for accessible, keyboard-navigable controls.
+- **CSS Modules** + design tokens (no Tailwind), monochrome "instrument" theme.
+- Fonts/icons bundled locally (Google Sans Flex + Material Symbols Outlined subset) — offline-safe, no CDN.
+- **ExtendScript** host logic (`public/jsx/hostscript.jsx`, namespaced under `$.global.TimerKeeper`) bridged to the UI via `CSInterface.evalScript`.
+
+## Compatibility
+| Requirement | Minimum |
+|---|---|
+| After Effects | 2022 (22.0) |
+| CEP runtime | 11 (Chromium 88) |
+
+> The floor was raised to After Effects 22.0 to match the rest of the current extension lineup and its modern UI stack.
 
 ## Main Features
-- **Start/Pause Timer:**
-  - Easily start or pause the timer for the current project with a single click.
-  
-- **Reset Timer:**
-  - Reset the timer for a selected project to track time from scratch.
-  
-- **Recent Projects Management:**
-  - View a list of recent projects with active timers.
-  - Delete selected projects from the recent list.
-  
-- **Refresh Data:**
-  - Manually reload timer data from the JSON file to ensure the latest information is displayed.
-  - Automatically resets the timer display upon refreshing to prevent conflicts with previous project data.
-  
-- **Open Project on Double-Click:**
-  - Quickly open a project by double-clicking it in the Recent Projects list.
-  
-- **Automatic Monitoring:**
-  - Automatically pauses the timer when switching between projects.
-  - Automatically starts the timer for newly opened projects.
-  
-- **Persistent Data Storage:**
-  - Saves timer data to a JSON file on your desktop, ensuring your progress is retained between sessions.
-  
-- **User-Friendly Interface:**
-  - Clean and intuitive UI with buttons for all major functions.
-  - Displays elapsed time in `HH:MM:SS` format.
-  
-- **Help & Documentation:**
-  - Built-in help panel providing detailed usage instructions and guidance.
+- **Real-time tracking:** start/pause the timer for the current project with a single click; time is saved continuously while it runs (autosave every 5 s, and on pause/close).
+- **Automatic project detection:** pauses the previous project and auto-starts the newly opened one if it already has tracked time; preventive pause for unsaved or version-converting projects.
+- **Project list:** search by name, double-click to open a project (and start timing it), delete a project and its data, refresh from disk.
+- **Reset:** clear the accumulated time for the selected project (with confirmation).
+- **Time format toggle:** switch between `HH:MM:SS` and a descriptive duration format.
+- **Dashboard:** total time tracked, today's time (real, per calendar day), project count, and a monochrome horizontal bar distribution with a Top 5 / All toggle.
+- **Help modal:** usage guide, "Open Data Location" shortcut, and a contact/documentation link.
+- **Toast notifications** for warnings (e.g. "pause before resetting") and confirmations.
+- **Flyout menu:** refresh and open documentation, directly from the panel's menu.
 
 ## Usage
-1. **Open Adobe After Effects.**
-2. **Launch the Timer Panel:**
-   - Go to `Window > TimerScript`.
-3. **Start the Timer:**
-   - Click the **Start** button to begin tracking time for the current project.
-   - A status message will confirm that the timer has started along with the initial time.
-4. **Pause the Timer:**
-   - Click the **Pause** button to pause the timer. A status message will display the paused time.
-5. **Reset the Timer:**
-   - Select a project from the **Recent Projects** list.
-   - Click the **Reset** button to reset its timer to `00:00:00`.
-6. **Delete a Project:**
-   - Select a project from the **Recent Projects** list.
-   - Click the **Delete Selected** button to remove it from the list.
-7. **Refresh Data:**
-   - Click the **Refresh Data** button to manually reload timer data from the JSON file.
-   - This action will reset the timer display to ensure no residual data causes conflicts.
-8. **Open Project on Double-Click:**
-   - Double-click any project listed under **Recent Projects** to open it directly in After Effects.
-9. **Access Help:**
-   - Click the **Help** button to view detailed instructions and information about the script.
-10. **Status Messages:**
-    - The status area at the bottom of the panel will display temporary messages about current operations.
-11. **Tooltips:**
-    - Hover over any button or interface element to see a detailed description of its function.
+1. Open Adobe After Effects.
+2. Go to **Window > Extensions > Timer Keeper**.
+3. **Timer tab:**
+   - Click **Start** to begin tracking the currently open project, **Pause** to stop.
+   - Select a project in the list and click **Reset** to clear its time, or **Delete** to remove it (both require pausing the timer first).
+   - Use the search field to filter the project list; double-click (or press Enter on) a project to open it in After Effects and start timing it.
+   - Click the swap icon next to the time display to toggle between `HH:MM:SS` and a descriptive format.
+4. **Dashboard tab:**
+   - Review total time tracked, today's time, and the number of tracked projects.
+   - Toggle between the **Top 5** and **All** projects in the distribution view.
+5. **Help:** click the help icon in the footer for a usage guide, quick access to your data file's folder, and support/documentation links.
+6. **Flyout menu:** open the panel's menu (top-right) to refresh the project list or open the online documentation.
 
-## Note
-If you leave the script open when closing Adobe After Effects and later reopen After Effects with the script still open, it **might not load** the previously saved information correctly. To ensure that all data loads properly, you can click the **Refresh** button to reload the saved timer data, or alternatively, close and reopen the script panel after launching Adobe After Effects.
-
-When switching between projects, it's recommended to pause the timer first. If you try to open another project by double-clicking it in the Recent Projects list while the timer is running, the script will display a warning message saying "Please pause the current project timer before switching to another project" along with details about the current project name and elapsed time. This warning helps prevent timing conflicts. The same caution applies when opening projects through File -> Open Project... or from the Home window (the default window showing recently opened After Effects projects). Pausing the timer ensures accurate time tracking between project switches.
+## Data
+Timer data is stored as JSON in `Documents/Adobe/TimerData/timerData.json`, written atomically (temp file + rename) by the ExtendScript host. Older formats from previous versions are detected and migrated automatically the first time you open the extension, with a backup copy written before the migration.
 
 ## Version History
-
-### v2.0 (Major UI and Architecture Overhaul)
-- **Complete UI Redesign:**
-  - Implemented a new three-panel layout (header, main, footer)
-  - Added comprehensive status message system
-  - Improved visual hierarchy and component organization
-  - Enhanced spacing and alignment throughout the interface
-  - Added persistent status display area for user feedback
-  - Integrated new watermark and branding elements
-
-- **Enhanced Project Management:**
-  - Added robust project validation system
-  - Improved project path handling and validation
-  - Enhanced project switching mechanism
-  - Added visual feedback for project selection
-  - Better handling of project names with special characters
-
-- **Advanced Timer Features:**
-  - Implemented comprehensive timer state management
-  - Added robust error handling for timer operations
-  - Enhanced timer data validation and calculations
-  - Improved synchronization between UI and timer state
-  - Added detailed time tracking feedback
-
-- **Improved User Experience:**
-  - Added tooltips for all major UI elements
-  - Enhanced help system with better organization
-  - Implemented temporary status messages
-  - Added detailed feedback for all user actions
-  - Improved project list interaction and feedback
-
-- **Technical Improvements:**
-  - Restructured code architecture for better maintainability
-  - Enhanced error handling throughout the script
-  - Improved data validation and sanitization
-  - Optimized memory management
-  - Enhanced file operations for data persistence
-  - Better handling of modal dialogs and UI states
-
-### v1.1 (Enhanced Functionality)
-- **Added Refresh Data Feature:**
-  - Introduced a **Refrescar Datos** button to manually reload timer data from the JSON file.
-  - Ensures that the latest timer information is accurately displayed in the Recent Projects panel.
-  
-- **Open Project on Double-Click:**
-  - Enabled opening a project directly from the Recent Projects list by double-clicking on it.
-  
-- **Improved Error Handling:**
-  - Enhanced robustness to prevent script freezing when adding new projects not previously stored.
-  - Implemented checks to avoid executing scripts while modal dialogs are open, preventing common After Effects errors.
-  
-- **Reset Timer Display on Refresh:**
-  - Automatically resets the timer display upon refreshing data to eliminate residual information from previous projects.
-  
-- **Enhanced Modal Dialog Management:**
-  - Added flags to detect and manage modal dialogs, ensuring that alerts and confirmations do not interfere with script execution.
-  
-- **Optimized Data Saving Mechanism:**
-  - Updated the data saving process to write to a temporary file first before renaming, reducing the risk of data corruption.
-
-### v1.0 (Initial Release)
-- Added core timer functionalities: start, pause, and reset.
-- Implemented recent projects tracking with persistent storage.
-- Designed user-friendly interface with essential buttons.
-- Introduced automatic project monitoring to handle timer state based on active projects.
-- Integrated a help panel for user guidance and support.
+For detailed version history and changelog, please see [CHANGELOG.md](CHANGELOG.md).
 
 ## Support
-If you need help or want to provide feedback, you can contact me here:
-[https://linktr.ee/Dony.ae](https://linktr.ee/Dony.ae)
+For help or to provide feedback, please contact me at:
+[https://donyaep.vercel.app/](https://donyaep.vercel.app/)
 
-Enjoy using Timer Script and boost your After Effects workflow! :>
+Enjoy the extension and stay on top of your project time!

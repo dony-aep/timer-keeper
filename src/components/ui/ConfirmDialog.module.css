@@ -1,0 +1,17 @@
+.message {
+  color: var(--ink-mid);
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.message strong {
+  color: var(--ink-hi);
+  font-weight: 620;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}

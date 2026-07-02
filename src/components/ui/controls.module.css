@@ -1,0 +1,127 @@
+/* ============================================================
+   Console controls — buttons styled as instrument keys.
+   ============================================================ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 540;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-1);
+  background: var(--surface-2);
+  color: var(--ink-hi);
+  padding: 8px 14px;
+  min-height: 34px;
+  cursor: pointer;
+  transition:
+    background var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out);
+}
+
+.buttonLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.button[data-hovered] {
+  background: var(--surface-3);
+  border-color: var(--line-strong);
+}
+
+.button[data-pressed] {
+  transform: translateY(1px);
+}
+
+.button[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.button[data-disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Primary "key": inverted, like the record key on a deck. */
+.key {
+  background: var(--key-bg);
+  border-color: var(--key-bg);
+  color: var(--key-ink);
+  font-weight: 640;
+}
+
+.key[data-hovered] {
+  background: var(--key-bg-hover);
+  border-color: var(--key-bg-hover);
+}
+
+.outline {
+  background: transparent;
+  color: var(--ink-mid);
+}
+
+.outline[data-hovered] {
+  background: var(--veil-hover);
+  color: var(--ink-hi);
+}
+
+.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-mid);
+}
+
+.ghost[data-hovered] {
+  background: var(--veil-hover);
+  color: var(--ink-hi);
+}
+
+/* Square, quiet icon-only control. */
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-1);
+  background: transparent;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition:
+    background var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+
+.iconButton[data-hovered] {
+  background: var(--veil-hover);
+  border-color: var(--line);
+  color: var(--ink-hi);
+}
+
+.iconButton[data-pressed] {
+  background: var(--veil-press);
+}
+
+.iconButton[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.iconButton[data-disabled] {
+  opacity: 0.4;
+  cursor: default;
+}

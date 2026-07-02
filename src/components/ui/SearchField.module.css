@@ -1,0 +1,80 @@
+/* ============================================================
+   SearchField — instrument-style filter input.
+   ============================================================ */
+
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Auto basis, not `flex: 1`: on narrow panels the list header stacks into a
+     column, and there a 0% basis would override the fixed height (the flex
+     main axis turns vertical) and crush the field. */
+  flex: 1 1 auto; /* grow to fill the row (list header) at any panel width */
+  min-width: 0;
+  height: 32px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-1);
+  background: var(--surface-1);
+  transition: border-color var(--dur-1) var(--ease-out);
+}
+
+.field:focus-within {
+  border-color: var(--line-strong);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 9px;
+  color: var(--ink-lo);
+  pointer-events: none;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink-hi);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0 30px 0 30px;
+}
+
+.input::placeholder {
+  color: var(--ink-lo);
+}
+
+.clear {
+  position: absolute;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--ink-lo);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-1);
+  cursor: pointer;
+  transition:
+    background var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+
+.field[data-empty] .clear {
+  display: none;
+}
+
+.clear[data-hovered] {
+  background: var(--veil-hover);
+  color: var(--ink-hi);
+}
+
+.clear[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}

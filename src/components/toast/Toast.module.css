@@ -1,0 +1,95 @@
+.viewport {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 46px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 8px 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-drop);
+  animation: tk-rise var(--dur-2) var(--ease-out);
+}
+
+.leaving {
+  animation: tk-fade var(--dur-2) var(--ease-out) reverse forwards;
+}
+
+/* Kinds — differentiated by icon luminance only (no hue, no accent border). */
+.info .kindIcon {
+  color: var(--ink-lo);
+}
+
+.success .kindIcon {
+  color: var(--ink-hi);
+}
+
+.warning .kindIcon {
+  color: var(--ink-mid);
+}
+
+.error {
+  background: var(--surface-3);
+}
+.error .kindIcon {
+  color: var(--ink-hi);
+}
+.error .message {
+  color: var(--ink-hi);
+}
+
+.kindIcon {
+  margin-top: 1px;
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-mid);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border: none;
+  border-radius: var(--radius-1);
+  background: transparent;
+  color: var(--ink-lo);
+  cursor: pointer;
+  transition:
+    background var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+
+.close[data-hovered] {
+  background: var(--veil-hover);
+  color: var(--ink-hi);
+}
+
+.close[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}

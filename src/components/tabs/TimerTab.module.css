@@ -1,0 +1,246 @@
+/* ============================================================
+   TimerTab — the studio chronometer.
+   ============================================================ */
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  padding: 10px;
+}
+
+/* ---------- Display card ---------- */
+
+.display {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 16px 18px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-3);
+  animation: tk-rise var(--dur-3) var(--ease-out);
+}
+
+.readoutRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.readoutRow > button {
+  position: absolute;
+  right: 0;
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-variation-settings:
+    'wght' 620,
+    'wdth' 92;
+  font-size: clamp(27px, 10vw, 40px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink-hi);
+  transition: color var(--dur-3) var(--ease-out);
+  white-space: nowrap;
+}
+
+.timeLive {
+  color: var(--ink-max);
+}
+
+.colon {
+  display: inline-block;
+  padding: 0 1px;
+  opacity: 1;
+}
+
+.colonLive {
+  animation: tk-colon-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes tk-colon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+.projectRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  color: var(--ink-mid);
+}
+
+.projectRow > span.material-symbols-outlined {
+  color: var(--ink-lo);
+  flex: none;
+}
+
+.projectName {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transport {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.transport > * {
+  flex: 1;
+}
+
+/* ---------- Project list ---------- */
+
+.listPanel {
+  flex: 1;
+  /* Floor, not 0: below this the section stops compressing and overflows the
+     tab instead, so the outer panel (.panel in App) gains a vertical scrollbar
+     on short panels rather than crushing the list to a sliver. */
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: tk-rise var(--dur-3) var(--ease-out) 60ms both;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panelTitle {
+  flex: none;
+  font-size: 12px;
+  font-weight: 620;
+  letter-spacing: 0.02em;
+  color: var(--ink-lo);
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-lo);
+  font-size: 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-2);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2);
+  padding: 4px;
+  background: var(--surface-1);
+  outline: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-1);
+  cursor: default;
+  transition: background var(--dur-1) var(--ease-out);
+}
+
+.row[data-hovered] {
+  background: var(--veil-hover);
+}
+
+.row[data-selected] {
+  background: var(--surface-3);
+}
+
+.row[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: -1px;
+}
+
+.rowTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--ink-hi);
+}
+
+.rowTime {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--ink-lo);
+}
+
+.row[data-selected] .rowTime {
+  color: var(--ink-mid);
+}
+
+.listActions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.listActions > button:first-child {
+  flex: 1;
+}
+
+/* ---------- Narrow panels (CEP panels dock as thin as 250px) ---------- */
+
+/* Stack the list header so the search field spans the full width instead of
+   fighting the "PROJECTS" label for room. */
+@media (max-width: 300px) {
+  .listHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 288px) {
+  .tab {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .display {
+    gap: 12px;
+    padding: 16px 12px 14px;
+  }
+
+  .transport {
+    gap: 6px;
+  }
+}

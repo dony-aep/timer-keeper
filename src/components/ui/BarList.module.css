@@ -1,0 +1,79 @@
+/* ============================================================
+   BarList — monochrome horizontal distribution.
+   ============================================================ */
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--ink-lo);
+  font-size: 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-2);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: tk-fade var(--dur-3) var(--ease-out) both;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: var(--ink-mid);
+}
+
+.meta {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-size: 10.5px;
+  color: var(--ink-lo);
+}
+
+.track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ink-mid);
+  transition:
+    width var(--dur-3) var(--ease-out),
+    background var(--dur-1) var(--ease-out);
+}
+
+.row:hover .label {
+  color: var(--ink-hi);
+}
+
+.row:hover .fill {
+  background: var(--ink-hi);
+}
