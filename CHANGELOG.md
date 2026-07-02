@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.0] - 2026-07-01
 
+### Added
+- **Update notifications**: the panel checks the GitHub Releases API (automatically at most once a day, or on demand via the new "Check for Updates" flyout action) and shows an "Update vX.Y.Z" link in the footer when a newer version is published. Fails silently offline — the panel never depends on the network.
+
 ### Changed
 - **Complete rewrite**: rebuilt from a single vanilla-JS CEP extension into a modular React 19 + TypeScript + Vite codebase, following the same architecture as Layers Pane Plus v4.
 - **Rebranded to "Timer Keeper"**: the extension is no longer called "AE TimerKeeper" — new display name, new bundle/extension ID (`com.donyaep.TimerKeeper`), new panel folder. Previous installs (`com.dony.aetimerkeeper`) should be removed manually; existing tracked time is preserved automatically (see Data below).

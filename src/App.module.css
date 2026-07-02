@@ -81,6 +81,42 @@
   align-items: center;
 }
 
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Update-available link: brighter than the footer's resting gray so it reads
+   as actionable, but still monochrome — no accent color. */
+.updateLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-hi);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  animation: tk-fade var(--dur-3) var(--ease-out);
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+.updateLink:hover {
+  color: var(--ink-max);
+}
+
+.updateLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .link {
   font-family: inherit;
   background: none;

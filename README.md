@@ -83,7 +83,8 @@ After `npm run deploy`, restart After Effects to load the updated panel.
 - **Dashboard:** total time tracked, today's time (real, per calendar day), project count, and a monochrome horizontal bar distribution with a Top 5 / All toggle.
 - **Help modal:** usage guide, "Open Data Location" shortcut, and a contact/documentation link.
 - **Toast notifications** for warnings (e.g. "pause before resetting") and confirmations.
-- **Flyout menu:** refresh and open documentation, directly from the panel's menu.
+- **Update notifications:** checks GitHub Releases (at most once a day) and shows a footer link when a newer version is available; a manual "Check for Updates" lives in the flyout menu. Fully silent offline.
+- **Flyout menu:** refresh, check for updates, and open documentation, directly from the panel's menu.
 
 ## Usage
 1. Open Adobe After Effects.

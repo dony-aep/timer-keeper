@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Tabs, TabList, Tab, TabPanel } from 'react-aria-components'
 import { useCSInterface } from './hooks/useCSInterface'
+import { useUpdateCheck } from './hooks/useUpdateCheck'
+import { useToasts } from './components/toast/ToastProvider'
 import { TimerTab } from './components/tabs/TimerTab'
 import { DashboardTab } from './components/tabs/DashboardTab'
 import { HelpModal } from './components/ui/HelpModal'
@@ -16,6 +18,8 @@ const TABS = [
 
 export function App() {
   const { openURL, setPanelFlyout, addEventListener, removeEventListener } = useCSInterface()
+  const { update, checkNow } = useUpdateCheck()
+  const { push } = useToasts()
 
   useEffect(() => {
     const version = `v${__APP_VERSION__}`
@@ -23,6 +27,7 @@ export function App() {
       `<Menu>` +
         `<MenuItem Id="refreshPanel" Label="Refresh Timer Keeper ${version}" Enabled="true"/>` +
         `<MenuItem Id="separator" Label="---" Enabled="false"/>` +
+        `<MenuItem Id="checkUpdates" Label="Check for Updates" Enabled="true"/>` +
         `<MenuItem Id="documentationLink" Label="Open Documentation" Enabled="true"/>` +
         `</Menu>`,
     )
@@ -30,10 +35,21 @@ export function App() {
       const id = (event.data as unknown as { menuId: string }).menuId
       if (id === 'refreshPanel') location.reload()
       else if (id === 'documentationLink') openURL(DOC_URL)
+      else if (id === 'checkUpdates') {
+        void checkNow().then((result) => {
+          if (result.status === 'update') {
+            push(`Timer Keeper v${result.update.version} is available.`, 'info')
+          } else if (result.status === 'up-to-date') {
+            push(`You're on the latest version (v${__APP_VERSION__}).`, 'success')
+          } else {
+            push("Couldn't check for updates. Please try again later.", 'warning')
+          }
+        })
+      }
     }
     addEventListener('com.adobe.csxs.events.flyoutMenuClicked', handler)
     return () => removeEventListener('com.adobe.csxs.events.flyoutMenuClicked', handler)
-  }, [openURL, setPanelFlyout, addEventListener, removeEventListener])
+  }, [openURL, setPanelFlyout, addEventListener, removeEventListener, checkNow, push])
 
   return (
     <div className={styles.app}>
@@ -60,7 +76,19 @@ export function App() {
             dony.
           </button>
         </span>
-        <HelpModal />
+        <div className={styles.footerActions}>
+          {update ? (
+            <button
+              className={styles.updateLink}
+              title={`Open the Timer Keeper v${update.version} release page`}
+              onClick={() => openURL(update.url)}
+            >
+              <Icon name="arrow_circle_up" size={14} />
+              Update v{update.version}
+            </button>
+          ) : null}
+          <HelpModal />
+        </div>
       </footer>
     </div>
   )
