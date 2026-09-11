@@ -7,6 +7,9 @@ import { App } from './App'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { TimerProvider } from './context/TimerContext'
 import { ToastProvider } from './components/toast/ToastProvider'
+import { installPointerEventFallback } from './lib/pointerEventFallback'
+
+installPointerEventFallback()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

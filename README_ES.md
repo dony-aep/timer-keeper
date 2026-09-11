@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
-[![Versión](https://img.shields.io/badge/versión-4.0.0-white.svg)](CHANGELOG_ES.md)
+[![Versión](https://img.shields.io/badge/versión-4.0.1-white.svg)](CHANGELOG_ES.md)
 [![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibilidad)
 [![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibilidad)
 [![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#stack-tecnológico)
@@ -16,7 +16,11 @@ Timer Keeper es una extensión para Adobe After Effects que rastrea el tiempo qu
 Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde cero como **Timer Keeper**.
 
 ## Versión Actual
-**v4.0.0** - Reescritura completa: migrada a una arquitectura moderna y modular (React + TypeScript, compilada con Vite), un nuevo diseño monocromático "de instrumento", tracking diario real, y varios bugs de v3 corregidos. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+**v4.0.1** - Correcciones para macOS: en After Effects 2022 el panel ya no abre vacío, y los botones y pestañas responden a los clics. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+
+## Novedades en v4.0.1
+- **El panel carga en macOS:** en After Effects 2022 ya no abre vacío.
+- **Los clics funcionan en macOS:** los botones, las pestañas y la lista de proyectos responden en After Effects 2022.
 
 ## Novedades en v4.0.0
 - **Reconstruida desde cero** sobre una base modular React + TypeScript (compilada con Vite), reemplazando el panel de un solo archivo — más fácil de mantener y ampliar.
@@ -32,18 +36,20 @@ Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde ce
 
 ### Para usuarios (extensión ya compilada)
 1. Localiza la carpeta de extensiones CEP de After Effects:
-   ```
-   C:\Program Files (x86)\Common Files\Adobe\CEP\extensions
-   ```
-   (o, por usuario: `%APPDATA%\Adobe\CEP\extensions`)
-2. Coloca la carpeta de la extensión compilada (`com.donyaep.TimerKeeper`) en esa carpeta.
+   - **Windows:** `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions` (o, por usuario: `%APPDATA%\Adobe\CEP\extensions`)
+   - **macOS:** `/Library/Application Support/Adobe/CEP/extensions` (o, por usuario: `~/Library/Application Support/Adobe/CEP/extensions`)
+2. Coloca la carpeta de la extensión compilada (`com.donyaep.TimerKeeper`) en esa carpeta. El zip de la release contiene directamente los archivos de la extensión, así que extráelos en una carpeta con ese nombre.
 3. Inicia After Effects y abre la extensión desde **Ventana > Extensiones > Timer Keeper**.
 
 > Si tenías instalada "AE TimerKeeper" (`com.dony.aetimerkeeper`), elimínala de ambas carpetas de extensiones CEP — la nueva extensión usa un ID distinto y se trata como una instalación separada. Tu tiempo registrado no se pierde: vive en `Documents/Adobe/TimerData/` y se migra automáticamente en la primera carga.
 
-> Las builds de desarrollo sin firmar requieren activar el modo debug de CEP una vez:
+> Las builds de desarrollo sin firmar requieren activar el modo debug de CEP una vez. En Windows:
 > ```
 > reg add "HKCU\Software\Adobe\CSXS.11" /v PlayerDebugMode /t REG_SZ /d 1 /f
+> ```
+> En macOS, desde Terminal:
+> ```
+> defaults write com.adobe.CSXS.11 PlayerDebugMode 1 && killall cfprefsd
 > ```
 
 ### Para desarrolladores (compilar desde el código fuente)
@@ -73,6 +79,8 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
 | Runtime CEP | 11 (Chromium 88) |
 
 > El piso se elevó a After Effects 22.0 para alinearse con el resto de la línea actual de extensiones y su stack de UI moderno.
+
+> Probada en Windows 11 con After Effects 2026 y en macOS 12 Monterey con After Effects 2022.
 
 ## Características Principales
 - **Seguimiento en tiempo real:** inicia/pausa el timer para el proyecto actual con un clic; el tiempo se guarda continuamente mientras corre (autoguardado cada 5 s, y al pausar/cerrar).

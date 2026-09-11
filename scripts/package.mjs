@@ -3,10 +3,10 @@
  * Output: releases/timer-keeper-v{version}.zip
  * Usage: node scripts/package.mjs
  */
-import { existsSync, mkdirSync, readFileSync, statSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'fs'
 import { join, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { execSync } from 'child_process'
+import { execFileSync, execSync } from 'child_process'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const projectRoot = join(__dirname, '..')
@@ -34,10 +34,12 @@ if (!existsSync(releasesDir)) mkdirSync(releasesDir, { recursive: true })
 
 const distAbs = resolve(distDir)
 const zipAbs = resolve(zipPath)
-execSync(
-  `Compress-Archive -Path "${distAbs}\\*" -DestinationPath "${zipAbs}" -Force`,
-  { shell: 'powershell.exe', stdio: 'inherit' },
-)
+// Windows PowerShell 5.1's Compress-Archive stores entry paths with backslashes, which macOS
+// extracts as flat files named "CSXS\manifest.xml". The bsdtar bundled with Windows writes
+// forward slashes, and "-a" picks the zip format from the extension.
+const tar = join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe')
+if (existsSync(zipAbs)) rmSync(zipAbs)
+execFileSync(tar, ['-a', '-cf', zipAbs, '-C', distAbs, ...readdirSync(distAbs)], { stdio: 'inherit' })
 
 if (!existsSync(zipPath)) {
   console.error('ERROR: Failed to create zip.')
