@@ -9,6 +9,7 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 
 ### Cambiado
 - **Instalación más sencilla**: el zip de la release ahora trae dentro la carpeta `com.donyaep.TimerKeeper`, así que instalar es copiar esa carpeta en el directorio de extensiones CEP.
+- **Modo debug en Windows**: el zip de la release incluye `Add Keys.reg`, que activa `PlayerDebugMode` en CSXS 5 a 22 con un doble clic.
 
 ### Corregido
 - **Panel vacío en After Effects 2022 para macOS**: el panel abría vacío porque su código se cargaba como módulo ES, y el motor CEP 11 de macOS no lo ejecuta desde la carpeta de la extensión. Ahora se carga como script clásico.

@@ -43,7 +43,7 @@ Formerly distributed as "AE TimerKeeper", the extension has been rebuilt from th
 
 > If you previously installed "AE TimerKeeper" (`com.dony.aetimerkeeper`), remove it from both CEP extensions folders — the new extension uses a different ID and is treated as a separate install. Your tracked time is not lost: it lives in `Documents/Adobe/TimerData/` and is migrated automatically on first load.
 
-> Unsigned development builds require enabling CEP debug mode once. On Windows:
+> Unsigned development builds require enabling CEP debug mode once. On Windows, double-click `Add Keys.reg`, included in the release zip, or run:
 > ```
 > reg add "HKCU\Software\Adobe\CSXS.11" /v PlayerDebugMode /t REG_SZ /d 1 /f
 > ```
