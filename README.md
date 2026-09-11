@@ -38,7 +38,7 @@ Formerly distributed as "AE TimerKeeper", the extension has been rebuilt from th
 1. Locate the Adobe After Effects CEP Extensions folder:
    - **Windows:** `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions` (or, per user: `%APPDATA%\Adobe\CEP\extensions`)
    - **macOS:** `/Library/Application Support/Adobe/CEP/extensions` (or, per user: `~/Library/Application Support/Adobe/CEP/extensions`)
-2. Place the entire built extension folder (`com.donyaep.TimerKeeper`) in this directory. The release zip holds the extension files directly, so extract them into a folder with that name.
+2. Extract the release zip and copy the `com.donyaep.TimerKeeper` folder it contains into this directory.
 3. Launch After Effects and open the extension via **Window > Extensions > Timer Keeper**.
 
 > If you previously installed "AE TimerKeeper" (`com.dony.aetimerkeeper`), remove it from both CEP extensions folders — the new extension uses a different ID and is treated as a separate install. Your tracked time is not lost: it lives in `Documents/Adobe/TimerData/` and is migrated automatically on first load.

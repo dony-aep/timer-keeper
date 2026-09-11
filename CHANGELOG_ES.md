@@ -7,6 +7,9 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 
 ## [4.0.1] - 2026-09-10
 
+### Cambiado
+- **Instalación más sencilla**: el zip de la release ahora trae dentro la carpeta `com.donyaep.TimerKeeper`, así que instalar es copiar esa carpeta en el directorio de extensiones CEP.
+
 ### Corregido
 - **Panel vacío en After Effects 2022 para macOS**: el panel abría vacío porque su código se cargaba como módulo ES, y el motor CEP 11 de macOS no lo ejecuta desde la carpeta de la extensión. Ahora se carga como script clásico.
 - **Botones y pestañas sin respuesta en macOS**: en After Effects 2022 para macOS los clics llegaban al panel, pero ningún botón, pestaña ni elemento de la lista reaccionaba, porque ese motor no emite eventos de puntero. El panel ahora los genera a partir de los clics del ratón, y no interviene donde el motor ya los emite (comprobado en After Effects 2026 para Windows).
