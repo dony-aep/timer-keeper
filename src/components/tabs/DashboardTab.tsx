@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ToggleButton, ToggleButtonGroup } from 'react-aria-components'
-import { useTimer } from '../../context/TimerContext'
+import { useTimer, useTimerClock } from '../../context/TimerContext'
 import { StatCard } from '../ui/StatCard'
 import { DonutChart } from '../ui/DonutChart'
 import { BarList } from '../ui/BarList'
@@ -12,6 +12,17 @@ import styles from './DashboardTab.module.css'
 const TOP_COUNT = 5
 
 type ChartType = 'donut' | 'bar'
+
+/** Total y Hoy siguen el segundero; el gráfico se actualiza cuando se guarda el tiempo. */
+function LiveTotals({ total, today }: { total: number; today: number }) {
+  const { liveSeconds } = useTimerClock()
+  return (
+    <>
+      <StatCard icon="hourglass_top" label="Total tracked" value={formatTime(total + liveSeconds)} />
+      <StatCard icon="today" label="Today" value={formatTime(today + liveSeconds)} />
+    </>
+  )
+}
 
 export function DashboardTab() {
   const { store } = useTimer()
@@ -32,8 +43,7 @@ export function DashboardTab() {
   return (
     <div className={styles.tab}>
       <section className={styles.stats} aria-label="Summary">
-        <StatCard icon="hourglass_top" label="Total tracked" value={formatTime(total)} />
-        <StatCard icon="today" label="Today" value={formatTime(today)} />
+        <LiveTotals total={total} today={today} />
         <StatCard icon="folder_open" label="Projects" value={String(projectCount)} />
       </section>
 

@@ -245,3 +245,29 @@ export function projectTotal(store: StoreV2, path: string): number {
   const p = store.projects.find((entry) => entry.path === path)
   return p ? p.totalSeconds : 0
 }
+
+/** Segundos contados y todavía sin volcar al almacén, por día local ("YYYY-MM-DD"). */
+export type PendingTime = Record<string, number>
+
+export function addPending(pending: PendingTime, day: string, seconds: number): PendingTime {
+  if (!(seconds > 0) || !isFinite(seconds)) return pending
+  return { ...pending, [day]: (pending[day] || 0) + seconds }
+}
+
+export function pendingTotal(pending: PendingTime): number {
+  return Object.values(pending).reduce((sum, seconds) => sum + seconds, 0)
+}
+
+/** Vuelca el tiempo pendiente al proyecto, respetando el día en que se contó cada segundo. */
+export function applyPending(
+  store: StoreV2,
+  path: string,
+  title: string,
+  pending: PendingTime,
+): StoreV2 {
+  let next = store
+  for (const [day, seconds] of Object.entries(pending)) {
+    next = creditTime(next, path, title, seconds, day)
+  }
+  return next
+}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ListBox, ListBoxItem } from 'react-aria-components'
-import { useTimer } from '../../context/TimerContext'
+import { useTimer, useTimerClock } from '../../context/TimerContext'
 import { useToasts } from '../toast/ToastProvider'
 import { Button, IconButton } from '../ui/Button'
 import { Icon } from '../ui/Icon'
@@ -41,12 +41,22 @@ function TimeReadout({
   )
 }
 
+/** Solo este componente se re-renderiza con el segundero, no toda la pestaña. */
+function LiveTimeReadout({ descriptive, running }: { descriptive: boolean; running: boolean }) {
+  const { elapsedSeconds } = useTimerClock()
+  return <TimeReadout seconds={elapsedSeconds} descriptive={descriptive} running={running} />
+}
+
+function LiveRowTime({ baseSeconds }: { baseSeconds: number }) {
+  const { liveSeconds } = useTimerClock()
+  return <>{formatTime(baseSeconds + liveSeconds)}</>
+}
+
 export function TimerTab() {
   const {
     store,
     running,
     currentProject,
-    elapsedSeconds,
     snapshot,
     convertedPending,
     useDescriptiveFormat,
@@ -122,7 +132,7 @@ export function TimerTab() {
     <div className={styles.tab}>
       <section className={styles.display} aria-label="Timer">
         <div className={styles.readoutRow}>
-          <TimeReadout seconds={elapsedSeconds} descriptive={useDescriptiveFormat} running={running} />
+          <LiveTimeReadout descriptive={useDescriptiveFormat} running={running} />
           <IconButton
             icon="swap_horiz"
             aria-label="Toggle time format"
@@ -184,6 +194,8 @@ export function TimerTab() {
               setSelectedPath(first != null ? String(first) : null)
             }}
             className={styles.list}
+            // La fila activa depende de currentProject, que no forma parte de `items`.
+            dependencies={[currentProject?.path]}
           >
             {(project) => (
               <ListBoxItem
@@ -193,7 +205,13 @@ export function TimerTab() {
                 className={styles.row}
               >
                 <span className={styles.rowTitle}>{project.title}</span>
-                <span className={styles.rowTime}>{formatTime(project.totalSeconds)}</span>
+                <span className={styles.rowTime}>
+                  {project.path === currentProject?.path ? (
+                    <LiveRowTime baseSeconds={project.totalSeconds} />
+                  ) : (
+                    formatTime(project.totalSeconds)
+                  )}
+                </span>
               </ListBoxItem>
             )}
           </ListBox>

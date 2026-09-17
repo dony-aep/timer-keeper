@@ -10,6 +10,7 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 ### Cambiado
 - **Autoguardado más ligero**: guardar tu tiempo ya no se ejecuta dentro de After Effects. El panel escribe el archivo por sí mismo cada 30 segundos y cada vez que pausas, cambias de proyecto o cierras el panel, en vez de pedirle a After Effects que lo haga cada 5 segundos.
 - **Menos peticiones a After Effects**: el panel comprueba qué proyecto está abierto cada 5 segundos mientras cuenta y cada 10 en pausa, en vez de cada 2, y lo comprueba al momento cuando haces clic o pasas el ratón por el panel.
+- **Menos trabajo mientras el timer cuenta**: la lista de proyectos y el gráfico del Dashboard se refrescan cada vez que se guarda tu tiempo (cada 30 segundos) en vez de cada segundo. El reloj, la fila del proyecto activo y las cifras de Total y Hoy siguen actualizándose cada segundo.
 
 ### Corregido
 - **El archivo de datos podía perderse al fallar un guardado**: si reemplazar el archivo fallaba a mitad, podían borrarse tanto la copia antigua como la nueva. Ahora cada guardado conserva la versión anterior como `timerData.bak.json`, la restaura si algo falla y la carga la usa como respaldo.

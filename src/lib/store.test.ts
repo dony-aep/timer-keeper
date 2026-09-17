@@ -11,6 +11,9 @@ import {
   todaySeconds,
   projectTotal,
   basename,
+  addPending,
+  applyPending,
+  pendingTotal,
 } from './store'
 
 describe('parseStore - v2 passthrough', () => {
@@ -236,5 +239,50 @@ describe('basename', () => {
     expect(basename('C:\\proj\\A.aep')).toBe('A.aep')
     expect(basename('/Users/x/My Proj/File.aep')).toBe('File.aep')
     expect(basename('C:\\a%20b\\Cool%20File.aep')).toBe('Cool File.aep')
+  })
+})
+
+describe('pending time', () => {
+  it('adds seconds to a day without mutating the input', () => {
+    const empty = {}
+    const next = addPending(empty, '2026-07-01', 1)
+    expect(next).toEqual({ '2026-07-01': 1 })
+    expect(empty).toEqual({})
+  })
+
+  it('ignores non-positive or non-finite seconds', () => {
+    const pending = { '2026-07-01': 3 }
+    expect(addPending(pending, '2026-07-01', 0)).toBe(pending)
+    expect(addPending(pending, '2026-07-01', -1)).toBe(pending)
+    expect(addPending(pending, '2026-07-01', NaN)).toBe(pending)
+  })
+
+  it('accumulates within the same day', () => {
+    let pending = {}
+    for (let i = 0; i < 3; i++) pending = addPending(pending, '2026-07-01', 1)
+    expect(pending).toEqual({ '2026-07-01': 3 })
+  })
+
+  it('keeps separate days across midnight', () => {
+    const pending = addPending(addPending({}, '2026-07-01', 2), '2026-07-02', 3)
+    expect(pending).toEqual({ '2026-07-01': 2, '2026-07-02': 3 })
+    expect(pendingTotal(pending)).toBe(5)
+  })
+
+  it('credits pending time to the project, day by day', () => {
+    const seed: StoreV2 = {
+      version: 2,
+      projects: [
+        { path: 'C:\p\A.aep', title: 'A.aep', totalSeconds: 100, daily: { '2026-07-01': 100 } },
+      ],
+    }
+    const next = applyPending(seed, 'C:\p\A.aep', 'A.aep', { '2026-07-01': 10, '2026-07-02': 5 })
+    expect(projectTotal(next, 'C:\p\A.aep')).toBe(115)
+    expect(next.projects[0].daily).toEqual({ '2026-07-01': 110, '2026-07-02': 5 })
+  })
+
+  it('returns the same store when nothing is pending', () => {
+    const seed: StoreV2 = { version: 2, projects: [] }
+    expect(applyPending(seed, 'C:\p\A.aep', 'A.aep', {})).toBe(seed)
   })
 })

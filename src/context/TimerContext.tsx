@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -10,15 +11,18 @@ import {
 import type { HostSnapshot, StoreV2 } from '../types/data'
 import { creditableSeconds, dayKey, formatTime, MAX_TICK_GAP_MS } from '../lib/time'
 import {
+  addPending,
+  applyPending,
   basename,
-  creditTime,
   parseStore,
+  pendingTotal,
   projectTotal,
   removeProject as removeProjectFromStore,
   resetProject as resetProjectFromStore,
   sanitizePath,
   serializeStore,
   upsertProject,
+  type PendingTime,
 } from '../lib/store'
 import { escapeForEval, useCSInterface } from '../hooks/useCSInterface'
 import { reduceSnapshot, type SnapshotMachineState } from '../lib/snapshotMachine'
@@ -55,8 +59,6 @@ export interface TimerContextValue {
   running: boolean
   /** The project currently attached to the timer, or null. */
   currentProject: CurrentProject | null
-  /** Accumulated seconds for the current project (floored), 0 when none. */
-  elapsedSeconds: number
   /** Latest host snapshot (lets the UI label "Untitled Project*" vs "No project open"). */
   snapshot: HostSnapshot | null
   /**
@@ -82,6 +84,17 @@ export interface TimerContextValue {
 }
 
 const TimerContext = createContext<TimerContextValue | null>(null)
+
+export interface TimerClockValue {
+  /** Segundos del proyecto actual (redondeados hacia abajo), incluido lo contado desde el último volcado. */
+  elapsedSeconds: number
+  /** Segundos contados desde el último volcado al almacén (proyecto actual). */
+  liveSeconds: number
+}
+
+// Contexto aparte para lo que cambia cada segundo: así solo se re-renderizan sus
+// consumidores y no la lista de proyectos ni el Dashboard.
+const TimerClockContext = createContext<TimerClockValue>({ elapsedSeconds: 0, liveSeconds: 0 })
 
 const EMPTY_STORE: StoreV2 = { version: 2, projects: [] }
 
@@ -128,6 +141,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [convertedPending, setConvertedPendingState] =
     useState<CurrentProject | null>(readStoredConvertedPending)
+  const [liveSeconds, setLiveSeconds] = useState(0)
 
   // --- Engine refs (read by intervals/listeners without stale closures) ---
   const storeRef = useRef<StoreV2>(EMPTY_STORE)
@@ -139,6 +153,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const lastSnapshotRef = useRef<HostSnapshot | null>(null)
   const lastTickRef = useRef(0)
   const lastSaveRef = useRef(0)
+  const pendingRef = useRef<PendingTime>({})
   const pollingRef = useRef(false)
   // Data-safety guard: writes stay disabled until a load has SUCCEEDED, so a failed
   // read can never let an empty in-memory store overwrite good data on disk.
@@ -163,6 +178,19 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     storeRef.current = s
     setStore(s)
   }, [])
+
+  // El segundero acumula aparte y solo toca el almacén al guardar o pausar: cambiar `store`
+  // cada segundo re-renderizaba la lista de proyectos y el Dashboard enteros.
+  const flushPending = useCallback((): StoreV2 => {
+    const path = currentPathRef.current
+    const pending = pendingRef.current
+    pendingRef.current = {}
+    setLiveSeconds(0)
+    if (!path || Object.keys(pending).length === 0) return storeRef.current
+    const next = applyPending(storeRef.current, path, currentTitleRef.current, pending)
+    commitStore(next)
+    return next
+  }, [commitStore])
 
   const notify = useCallback((message: string, kind: NoticeKind) => {
     setNotice({ message, kind })
@@ -250,13 +278,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     }
     const seconds = creditableSeconds(deltaMs)
     if (!path || !(seconds > 0)) return
-    const next = creditTime(storeRef.current, path, currentTitleRef.current, seconds, dayKey())
-    commitStore(next)
+    pendingRef.current = addPending(pendingRef.current, dayKey(), seconds)
+    setLiveSeconds(pendingTotal(pendingRef.current))
     if (now - lastSaveRef.current >= SAVE_INTERVAL_MS) {
       lastSaveRef.current = now
-      persist(next)
+      persist(flushPending())
     }
-  }, [commitStore, persist, notify])
+  }, [persist, notify, flushPending])
 
   const clearCurrent = useCallback(() => {
     currentPathRef.current = null
@@ -267,6 +295,8 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   /** Attach the timer to `path` and start accumulating from now. */
   const beginTiming = useCallback(
     (path: string, title: string) => {
+      // Si quedara tiempo pendiente, pertenece al proyecto anterior: se vuelca antes de cambiar.
+      flushPending()
       commitStore(upsertProject(storeRef.current, path, title))
       currentPathRef.current = path
       currentTitleRef.current = title
@@ -277,7 +307,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       runningRef.current = true
       setRunning(true)
     },
-    [commitStore],
+    [commitStore, flushPending],
   )
 
   /** Stop the timer, flushing the final partial delta and saving. */
@@ -285,15 +315,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     (showNotice: boolean) => {
       if (!runningRef.current) return
       tick() // flush partial time before stopping
+      const saved = flushPending()
       runningRef.current = false
       setRunning(false)
-      persist(storeRef.current)
+      persist(saved)
       if (showNotice) {
-        const total = projectTotal(storeRef.current, currentPathRef.current ?? '')
+        const total = projectTotal(saved, currentPathRef.current ?? '')
         notify(`Timer paused for: ${currentTitleRef.current}\nTotal time: ${formatTime(total)}`, 'info')
       }
     },
-    [tick, persist, notify],
+    [tick, flushPending, persist, notify],
   )
 
   /**
@@ -593,19 +624,20 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         tick()
         runningRef.current = false
       }
+      const saved = flushPending()
       // Síncrono cuando hay cep.fs: un evalScript lanzado al descargarse el panel puede
       // no llegar a ejecutarse.
       const backend = backendRef.current
       if (backend?.saveNow && cep.isCEP && canPersistRef.current) {
-        backend.saveNow(serializeStore(storeRef.current))
+        backend.saveNow(serializeStore(saved))
         return
       }
-      void persist(storeRef.current)
+      void persist(saved)
     }
     const onHidden = () => {
       if (document.visibilityState === 'hidden') {
         if (runningRef.current) tick()
-        persist(storeRef.current)
+        persist(flushPending())
       }
     }
     window.addEventListener('beforeunload', flush)
@@ -614,32 +646,60 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('beforeunload', flush)
       document.removeEventListener('visibilitychange', onHidden)
     }
-  }, [tick, persist, cep])
+  }, [tick, flushPending, persist, cep])
 
   const elapsedSeconds = currentProject
-    ? Math.floor(projectTotal(store, currentProject.path))
+    ? Math.floor(projectTotal(store, currentProject.path) + liveSeconds)
     : 0
 
-  const value: TimerContextValue = {
-    store,
-    running,
-    currentProject,
-    elapsedSeconds,
-    snapshot,
-    convertedPending,
-    useDescriptiveFormat,
-    notice,
-    clearNotice,
-    start,
-    pause,
-    resetProject,
-    removeProject,
-    refresh,
-    openProject,
-    toggleTimeFormat,
-  }
+  const clock = useMemo(() => ({ elapsedSeconds, liveSeconds }), [elapsedSeconds, liveSeconds])
 
-  return <TimerContext.Provider value={value}>{children}</TimerContext.Provider>
+  const value = useMemo<TimerContextValue>(
+    () => ({
+      store,
+      running,
+      currentProject,
+      snapshot,
+      convertedPending,
+      useDescriptiveFormat,
+      notice,
+      clearNotice,
+      start,
+      pause,
+      resetProject,
+      removeProject,
+      refresh,
+      openProject,
+      toggleTimeFormat,
+    }),
+    [
+      store,
+      running,
+      currentProject,
+      snapshot,
+      convertedPending,
+      useDescriptiveFormat,
+      notice,
+      clearNotice,
+      start,
+      pause,
+      resetProject,
+      removeProject,
+      refresh,
+      openProject,
+      toggleTimeFormat,
+    ],
+  )
+
+  return (
+    <TimerContext.Provider value={value}>
+      <TimerClockContext.Provider value={clock}>{children}</TimerClockContext.Provider>
+    </TimerContext.Provider>
+  )
+}
+
+export function useTimerClock(): TimerClockValue {
+  return useContext(TimerClockContext)
 }
 
 export function useTimer(): TimerContextValue {
