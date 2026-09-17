@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Lighter autosave**: saving your time no longer runs inside After Effects. The panel writes the file itself every 30 seconds and whenever you pause, switch projects or close the panel, instead of asking After Effects to do it every 5 seconds.
+- **Fewer requests to After Effects**: the panel checks which project is open every 5 seconds while timing and every 10 seconds while paused, instead of every 2 seconds, and checks right away when you click or move the mouse over the panel.
 
 ### Fixed
 - **Data file could be lost on a failed save**: if replacing the data file failed halfway, both the old and the new copy could be deleted. Saves now keep the previous version as `timerData.bak.json`, restore it when a save fails, and loading falls back to it.

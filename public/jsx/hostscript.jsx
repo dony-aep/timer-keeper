@@ -319,11 +319,15 @@ $.global.TimerKeeper = (function () {
                 converting: false
             };
 
-            if (app.project) {
-                if (app.project.file) {
+            var project = app.project;
+            if (project) {
+                // Una sola lectura de project.file: cada acceso a la DOM de AE es una
+                // llamada nativa y esto se ejecuta en cada sondeo.
+                var projectFile = project.file;
+                if (projectFile) {
                     // Proyecto guardado abierto.
-                    snap.projectPath = app.project.file.fsName;
-                    snap.projectName = app.project.file.name;
+                    snap.projectPath = projectFile.fsName;
+                    snap.projectName = projectFile.name;
                     snap.unsaved = false;
                     snap.converting = false;
                 } else {

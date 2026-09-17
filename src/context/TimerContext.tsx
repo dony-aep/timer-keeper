@@ -24,11 +24,10 @@ import { escapeForEval, useCSInterface } from '../hooks/useCSInterface'
 import { reduceSnapshot, type SnapshotMachineState } from '../lib/snapshotMachine'
 import { createCepFsBackend, createHostBackend, type DataBackend } from '../lib/dataBackend'
 import { isCepFs } from '../lib/dataFile'
+import { nextPollDelay, sameSnapshot, TRIGGER_MIN_GAP_MS } from '../lib/polling'
 
 /** Milliseconds between UI ticks while the timer runs. */
 const TICK_MS = 1000
-/** Milliseconds between host snapshot polls. */
-const SNAPSHOT_MS = 2000
 /** Autosave cadence while running; pausing, switching projects and closing the panel also save. */
 const SAVE_INTERVAL_MS = 30000
 /** Consecutive host write failures before we warn the user. */
@@ -366,8 +365,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     try {
       const parsed = await fetchSnapshot()
       if (!parsed) return
+      // Sin cambios no hace falta volver a renderizar el panel.
+      if (!sameSnapshot(lastSnapshotRef.current, parsed)) setSnapshot(parsed)
       lastSnapshotRef.current = parsed
-      setSnapshot(parsed)
       applySnapshot(parsed)
     } finally {
       pollingRef.current = false
@@ -522,11 +522,48 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     void loadFromDisk()
   }, [loadFromDisk])
 
-  // Host snapshot polling every 2s.
+  // Host snapshot polling: slower while paused; see src/lib/polling.ts.
   useEffect(() => {
-    void pollSnapshot()
-    const id = window.setInterval(() => void pollSnapshot(), SNAPSHOT_MS)
-    return () => window.clearInterval(id)
+    let cancelled = false
+    let timer = 0
+    const loop = async () => {
+      await pollSnapshot()
+      if (cancelled) return
+      timer = window.setTimeout(
+        () => void loop(),
+        nextPollDelay(runningRef.current, emptyPollsRef.current),
+      )
+    }
+    void loop()
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [pollSnapshot])
+
+  // AE no emite eventos de cambio de proyecto: sondear al volver al panel acorta la espera
+  // sin subir la cadencia de fondo. mouseenter y no pointerenter: CEP 11 en macOS no emite
+  // Pointer Events.
+  useEffect(() => {
+    let lastTrigger = 0
+    const trigger = () => {
+      const now = Date.now()
+      if (now - lastTrigger < TRIGGER_MIN_GAP_MS) return
+      lastTrigger = now
+      void pollSnapshot()
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') trigger()
+    }
+    const root = document.documentElement
+    window.addEventListener('focus', trigger)
+    root.addEventListener('mouseenter', trigger)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener('focus', trigger)
+      root.removeEventListener('mouseenter', trigger)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [pollSnapshot])
 
   // Persistent 1s UI tick, gated by running.
