@@ -19,6 +19,9 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 - **La detección de proyectos podía pararse toda la sesión**: si After Effects no respondía a una de las comprobaciones del panel, este dejaba de notar los cambios de proyecto hasta recargarlo. Ahora cada comprobación se abandona a los 60 segundos y se vuelve a intentar.
 - **La suspensión contaba como trabajo**: si el ordenador se suspendía con el timer en marcha, al despertar se sumaba al proyecto todo el tiempo suspendido. Ahora no se cuentan los huecos de más de 5 minutos entre actualizaciones del timer, y el panel avisa cuando descarta uno.
 
+### Seguridad
+- **Sin puerto de depuración en las releases**: el zip de la release ya no incluye el archivo `.debug`, que abría un puerto de Chrome DevTools (8090) en cada instalación con el modo debug activado.
+
 ## [4.0.1] - 2026-09-10
 
 ### Cambiado

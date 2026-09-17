@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project detection could stop for the whole session**: if After Effects never answered one of the panel's checks, the panel stopped noticing project changes until it was reloaded. Checks now give up after 60 seconds and try again.
 - **Sleep counted as work**: if the computer went to sleep with the timer running, the whole sleep time was added to the project when it woke up. Gaps longer than 5 minutes between timer updates are no longer counted, and the panel tells you when it skips one.
 
+### Security
+- **No remote debugging port in release builds**: the release zip no longer includes the `.debug` file, which opened a Chrome DevTools port (8090) on every install with debug mode turned on.
+
 ## [4.0.1] - 2026-09-10
 
 ### Changed

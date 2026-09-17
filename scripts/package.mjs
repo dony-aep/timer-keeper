@@ -1,7 +1,8 @@
 /**
  * Package script – builds and zips dist/ for distribution.
  * Output: releases/timer-keeper-v{version}.zip, holding a com.donyaep.TimerKeeper/ folder and Add Keys.reg
- * Usage: node scripts/package.mjs
+ * Usage: node scripts/package.mjs [--with-debug]
+ * --with-debug keeps .debug (remote debugger on port 8090) and names the zip timer-keeper-v{version}-debug.zip
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'fs'
 import { join, resolve } from 'path'
@@ -20,7 +21,11 @@ const version = pkg.version
 
 const distDir = join(projectRoot, 'dist')
 const releasesDir = join(projectRoot, 'releases')
-const zipPath = join(releasesDir, `timer-keeper-v${version}.zip`)
+// Solo las builds de diagnóstico llevan .debug: con PlayerDebugMode activo, ese archivo abre
+// el depurador remoto del panel en cada instalación.
+const withDebug = process.argv.includes('--with-debug')
+const zipName = `timer-keeper-v${version}${withDebug ? '-debug' : ''}.zip`
+const zipPath = join(releasesDir, zipName)
 
 console.log(`Building Timer Keeper v${version}...`)
 try {
@@ -42,6 +47,7 @@ const zipAbs = resolve(zipPath)
 const stageDir = resolve(releasesDir, '.stage')
 rmSync(stageDir, { recursive: true, force: true })
 cpSync(distDir, join(stageDir, EXTENSION_ID), { recursive: true })
+if (!withDebug) rmSync(join(stageDir, EXTENSION_ID, '.debug'), { force: true })
 cpSync(join(projectRoot, REG_FILE), join(stageDir, REG_FILE))
 // Windows PowerShell 5.1's Compress-Archive stores entry paths with backslashes, which macOS
 // extracts as flat files named "CSXS\manifest.xml". The bsdtar bundled with Windows writes
@@ -56,4 +62,4 @@ if (!existsSync(zipPath)) {
   process.exit(1)
 }
 const sizeMB = (statSync(zipPath).size / 1024 / 1024).toFixed(2)
-console.log(`Package created: releases/timer-keeper-v${version}.zip (${sizeMB} MB)`)
+console.log(`Package created: releases/${zipName} (${sizeMB} MB)`)
