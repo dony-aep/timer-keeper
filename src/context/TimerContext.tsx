@@ -162,7 +162,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const backendRef = useRef<DataBackend | null>(null)
   const backendPromiseRef = useRef<Promise<DataBackend | null> | null>(null)
   const saveInFlightRef = useRef(false)
-  const pendingJsonRef = useRef<string | null>(null)
+  const pendingStoreRef = useRef<StoreV2 | null>(null)
   // Conversion tracking: the path we just asked AE to open (so an ensuing "unsaved"
   // snapshot can be recognised as that project's converted copy), and its promotion.
   const pendingOpenPathRef = useRef<string | null>(null)
@@ -230,16 +230,26 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       if (!cep.isCEP || !canPersistRef.current) return
       const backend = await resolveBackend()
       if (!backend) return
-      pendingJsonRef.current = serializeStore(s)
+      pendingStoreRef.current = s
       // Una sola escritura a la vez: si AE está ocupado, los guardados no se encolan; el
-      // bucle en curso recoge el JSON más reciente.
+      // bucle en curso recoge el almacén más reciente.
       if (saveInFlightRef.current) return
       saveInFlightRef.current = true
       try {
-        while (pendingJsonRef.current !== null) {
-          const json: string = pendingJsonRef.current
-          pendingJsonRef.current = null
-          if (await backend.save(json)) {
+        while (pendingStoreRef.current !== null) {
+          const next: StoreV2 = pendingStoreRef.current
+          pendingStoreRef.current = null
+          let ok: boolean
+          if (backend.saveMerged) {
+            const result = backend.saveMerged(next)
+            ok = result.ok
+            // Muestra lo que añadió otra instancia de AE, salvo que el almacén ya haya
+            // cambiado: entonces el siguiente guardado vuelve a fusionar.
+            if (ok && result.merged && storeRef.current === next) commitStore(result.store)
+          } else {
+            ok = await backend.save(serializeStore(next))
+          }
+          if (ok) {
             saveFailuresRef.current = 0
             continue
           }
@@ -255,7 +265,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         saveInFlightRef.current = false
       }
     },
-    [cep, notify, resolveBackend],
+    [cep, notify, resolveBackend, commitStore],
   )
 
   /**
@@ -441,6 +451,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       await backend.saveBackupOnce(raw)
       await backend.save(serializeStore(result.store))
     }
+    backend?.markLoaded?.(result.store)
     commitStore(result.store)
     canPersistRef.current = true
     saveFailuresRef.current = 0
@@ -633,8 +644,8 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       // Síncrono cuando hay cep.fs: un evalScript lanzado al descargarse el panel puede
       // no llegar a ejecutarse.
       const backend = backendRef.current
-      if (backend?.saveNow && cep.isCEP && canPersistRef.current) {
-        backend.saveNow(serializeStore(saved))
+      if (backend?.saveMerged && cep.isCEP && canPersistRef.current) {
+        backend.saveMerged(saved)
         return
       }
       void persist(saved)

@@ -14,6 +14,7 @@ import {
   addPending,
   applyPending,
   pendingTotal,
+  mergeStores,
 } from './store'
 
 describe('parseStore - v2 passthrough', () => {
@@ -273,16 +274,104 @@ describe('pending time', () => {
     const seed: StoreV2 = {
       version: 2,
       projects: [
-        { path: 'C:\p\A.aep', title: 'A.aep', totalSeconds: 100, daily: { '2026-07-01': 100 } },
+        { path: 'C:\\p\\A.aep', title: 'A.aep', totalSeconds: 100, daily: { '2026-07-01': 100 } },
       ],
     }
-    const next = applyPending(seed, 'C:\p\A.aep', 'A.aep', { '2026-07-01': 10, '2026-07-02': 5 })
-    expect(projectTotal(next, 'C:\p\A.aep')).toBe(115)
+    const next = applyPending(seed, 'C:\\p\\A.aep', 'A.aep', { '2026-07-01': 10, '2026-07-02': 5 })
+    expect(projectTotal(next, 'C:\\p\\A.aep')).toBe(115)
     expect(next.projects[0].daily).toEqual({ '2026-07-01': 110, '2026-07-02': 5 })
   })
 
   it('returns the same store when nothing is pending', () => {
     const seed: StoreV2 = { version: 2, projects: [] }
-    expect(applyPending(seed, 'C:\p\A.aep', 'A.aep', {})).toBe(seed)
+    expect(applyPending(seed, 'C:\\p\\A.aep', 'A.aep', {})).toBe(seed)
+  })
+})
+
+describe('mergeStores', () => {
+  const A = 'C:\\p\\A.aep'
+  const B = 'C:\\p\\B.aep'
+  const C = 'C:\\p\\C.aep'
+  const DAY = '2026-09-16'
+  const NEXT = '2026-09-17'
+  const entry = (path: string, seconds: number, daily: Record<string, number> = { [DAY]: seconds }, title = basename(path)) => ({
+    path,
+    title,
+    totalSeconds: seconds,
+    daily,
+  })
+  const store = (...projects: ReturnType<typeof entry>[]): StoreV2 => ({ version: 2, projects })
+  const base = store(entry(A, 100))
+
+  it('returns the disk contents when nobody changed anything', () => {
+    expect(mergeStores(base, base, base)).toEqual(base)
+  })
+
+  it('keeps time added only by this instance', () => {
+    const merged = mergeStores(base, store(entry(A, 160)), base)
+    expect(merged.projects[0]).toEqual(entry(A, 160))
+  })
+
+  it('adds the time both instances tracked on the same project', () => {
+    const merged = mergeStores(base, store(entry(A, 160)), store(entry(A, 130)))
+    expect(merged.projects[0]).toEqual(entry(A, 190))
+  })
+
+  it('keeps a project the other instance added', () => {
+    const merged = mergeStores(base, base, store(entry(A, 100), entry(B, 40)))
+    expect(merged.projects.map((p) => p.path)).toEqual([A, B])
+  })
+
+  it('appends a project this instance added', () => {
+    const merged = mergeStores(base, store(entry(A, 100), entry(C, 20)), base)
+    expect(merged.projects.map((p) => p.path)).toEqual([A, C])
+  })
+
+  it('respects a removal by the other instance when we did not touch the project', () => {
+    expect(mergeStores(base, base, store()).projects).toEqual([])
+  })
+
+  it('keeps our entry when the other instance removed it but we tracked time', () => {
+    const merged = mergeStores(base, store(entry(A, 160)), store())
+    expect(merged.projects).toEqual([entry(A, 160)])
+  })
+
+  it('respects our removal when the other instance did not touch the project', () => {
+    expect(mergeStores(base, store(), base).projects).toEqual([])
+  })
+
+  it('keeps time the other instance added after our reset', () => {
+    const merged = mergeStores(base, store(entry(A, 0, {})), store(entry(A, 130)))
+    expect(merged.projects[0]).toEqual(entry(A, 30))
+  })
+
+  it('merges time tracked on different days', () => {
+    const merged = mergeStores(
+      base,
+      store(entry(A, 110, { [DAY]: 110 })),
+      store(entry(A, 105, { [DAY]: 100, [NEXT]: 5 })),
+    )
+    expect(merged.projects[0]).toEqual(entry(A, 115, { [DAY]: 110, [NEXT]: 5 }))
+  })
+
+  it('keeps our rename and otherwise the disk title', () => {
+    const renamed = mergeStores(base, store(entry(A, 100, { [DAY]: 100 }, 'Renamed.aep')), base)
+    expect(renamed.projects[0].title).toBe('Renamed.aep')
+    const theirs = mergeStores(base, base, store(entry(A, 100, { [DAY]: 100 }, 'Theirs.aep')))
+    expect(theirs.projects[0].title).toBe('Theirs.aep')
+  })
+
+  it('drops floating point leftovers', () => {
+    const b = store(entry(A, 0.3, { [DAY]: 0.3 }))
+    const merged = mergeStores(b, store(entry(A, 0.1 + 0.2, { [DAY]: 0.1 + 0.2 })), b)
+    expect(merged.projects[0].daily).toEqual({ [DAY]: 0.3 })
+  })
+
+  it('does not mutate its inputs', () => {
+    const ours = store(entry(A, 160))
+    const disk = store(entry(A, 130), entry(B, 40))
+    const snapshot = JSON.stringify([base, ours, disk])
+    mergeStores(base, ours, disk)
+    expect(JSON.stringify([base, ours, disk])).toBe(snapshot)
   })
 })

@@ -6,10 +6,13 @@ import {
   joinPath,
   normalizeFolder,
   readDataFile,
+  readMainText,
+  saveWithMerge,
   writeBackupOnce,
   writeDataFile,
 } from './dataFile'
 import { FakeFs } from './testFakeFs'
+import { serializeStore } from './store'
 
 const dir = 'C:/data'
 const main = `${dir}/timerData.json`
@@ -160,5 +163,69 @@ describe('isCepFs', () => {
     expect(isCepFs({})).toBe(false)
     const partial = { ...new FakeFs() } as Record<string, unknown>
     expect(isCepFs(partial)).toBe(false)
+  })
+})
+
+describe('saveWithMerge', () => {
+  const A = 'C:\\p\\A.aep'
+  const B = 'C:\\p\\B.aep'
+  const DAY = '2026-09-16'
+  const project = (path: string, seconds: number) => ({
+    path,
+    title: path.split('\\').pop() as string,
+    totalSeconds: seconds,
+    daily: { [DAY]: seconds },
+  })
+  const store = (...projects: ReturnType<typeof project>[]) => ({ version: 2 as const, projects })
+
+  function loaded(fs: FakeFs, initial = store(project(A, 100))) {
+    writeDataFile(fs, dir, serializeStore(initial))
+    return { base: initial, text: readMainText(fs, dir) }
+  }
+
+  it('writes our store when nobody else touched the file', () => {
+    const fs = fsWithDir()
+    const sync = loaded(fs)
+    const ours = store(project(A, 160))
+    const result = saveWithMerge(fs, dir, ours, sync)
+    expect(result.ok).toBe(true)
+    expect(result.merged).toBe(false)
+    expect(JSON.parse(fs.text(main) as string)).toEqual(ours)
+    expect(result.sync.base).toBe(ours)
+  })
+
+  it('merges what another instance wrote since our last read', () => {
+    const fs = fsWithDir()
+    const sync = loaded(fs)
+    fs.put(main, serializeStore(store(project(A, 130), project(B, 40))))
+    const result = saveWithMerge(fs, dir, store(project(A, 160)), sync)
+    expect(result.ok).toBe(true)
+    expect(result.merged).toBe(true)
+    expect(JSON.parse(fs.text(main) as string)).toEqual(store(project(A, 190), project(B, 40)))
+  })
+
+  it('does not overwrite a corrupt file written by someone else', () => {
+    const fs = fsWithDir()
+    const sync = loaded(fs)
+    fs.put(main, '{roto')
+    const result = saveWithMerge(fs, dir, store(project(A, 160)), sync)
+    expect(result.ok).toBe(false)
+    expect(fs.text(main)).toBe('{roto')
+    expect(result.sync).toBe(sync)
+  })
+
+  it('does not overwrite a file it cannot read', () => {
+    const fs = fsWithDir()
+    const sync = loaded(fs)
+    fs.put(main, serializeStore(store(project(A, 130))))
+    fs.failRead.add(main)
+    expect(saveWithMerge(fs, dir, store(project(A, 160)), sync).ok).toBe(false)
+  })
+
+  it('writes the first save when no file exists yet', () => {
+    const fs = fsWithDir()
+    const result = saveWithMerge(fs, dir, store(project(A, 10)), { base: store(), text: '' })
+    expect(result).toMatchObject({ ok: true, merged: false })
+    expect(result.sync.text).toBe(readMainText(fs, dir))
   })
 })

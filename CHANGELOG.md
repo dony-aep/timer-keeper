@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Data file could be lost on a failed save**: if replacing the data file failed halfway, both the old and the new copy could be deleted. Saves now keep the previous version as `timerData.bak.json`, restore it when a save fails, and loading falls back to it.
 - **Project detection could stop for the whole session**: if After Effects never answered one of the panel's checks, the panel stopped noticing project changes until it was reloaded. Checks now give up after 60 seconds and try again.
+- **Two After Effects windows overwriting each other's time**: when two instances of After Effects track time at the same time (for example a release and a beta), each save now adds what the other one wrote instead of replacing it.
 - **Sleep counted as work**: if the computer went to sleep with the timer running, the whole sleep time was added to the project when it woke up. Gaps longer than 5 minutes between timer updates are no longer counted, and the panel tells you when it skips one.
 
 ### Security

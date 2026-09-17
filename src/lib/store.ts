@@ -271,3 +271,55 @@ export function applyPending(
   }
   return next
 }
+
+// Evita restos de coma flotante (p. ej. 5e-17 s) al restar la base en una fusión.
+function roundMs(seconds: number): number {
+  return Math.round(seconds * 1000) / 1000
+}
+
+function mergeEntry(base: ProjectEntry | undefined, ours: ProjectEntry, disk: ProjectEntry): ProjectEntry {
+  const days = new Set([
+    ...Object.keys(ours.daily),
+    ...Object.keys(disk.daily),
+    ...Object.keys(base?.daily ?? {}),
+  ])
+  const daily: Record<string, number> = {}
+  for (const day of days) {
+    const seconds = roundMs((disk.daily[day] ?? 0) + (ours.daily[day] ?? 0) - (base?.daily[day] ?? 0))
+    if (seconds > 0) daily[day] = seconds
+  }
+  return {
+    path: disk.path,
+    title: base && ours.title !== base.title ? ours.title : disk.title,
+    totalSeconds: Math.max(0, roundMs(disk.totalSeconds + ours.totalSeconds - (base?.totalSeconds ?? 0))),
+    daily,
+  }
+}
+
+/**
+ * Fusión a tres bandas para dos instancias de After Effects que escriben el mismo archivo:
+ * `base` es lo que había en disco cuando esta instancia cargó o guardó por última vez,
+ * `ours` lo que tiene ahora y `disk` lo que otra instancia escribió después. Se suma lo que
+ * añadió cada una desde `base`. Un proyecto borrado por una instancia desaparece salvo que
+ * la otra le haya sumado tiempo después.
+ */
+export function mergeStores(base: StoreV2, ours: StoreV2, disk: StoreV2): StoreV2 {
+  const byPath = (store: StoreV2) => new Map(store.projects.map((p) => [p.path, p]))
+  const baseByPath = byPath(base)
+  const oursByPath = byPath(ours)
+  const diskByPath = byPath(disk)
+  const projects: ProjectEntry[] = []
+
+  for (const d of disk.projects) {
+    const b = baseByPath.get(d.path)
+    const o = oursByPath.get(d.path)
+    if (o) projects.push(mergeEntry(b, o, d))
+    else if (!b || d.totalSeconds !== b.totalSeconds) projects.push(d)
+  }
+  for (const o of ours.projects) {
+    if (diskByPath.has(o.path)) continue
+    const b = baseByPath.get(o.path)
+    if (!b || o.totalSeconds !== b.totalSeconds) projects.push(o)
+  }
+  return { version: 2, projects }
+}

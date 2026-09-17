@@ -4,6 +4,9 @@
  * After Effects, como pasaba al escribir desde ExtendScript.
  */
 
+import type { StoreV2 } from '../types/data'
+import { mergeStores, parseStore, serializeStore } from './store'
+
 /** Subconjunto de window.cep.fs que usa el guardado (ver CEPEngine_extensions.js de CEP). */
 export interface CepFsLike {
   readFile(path: string, encoding?: string): { data: string; err: number }
@@ -133,4 +136,50 @@ export function writeBackupOnce(fs: CepFsLike, folder: string, raw: string): boo
   const path = joinPath(folder, MIGRATION_BACKUP_FILE)
   if (fileExists(fs, path)) return true
   return fs.writeFile(path, raw, UTF8).err === FS_NO_ERROR
+}
+
+/** Contenido actual de timerData.json: '' si no existe, 'false' si no se pudo leer. */
+export function readMainText(fs: CepFsLike, folder: string): string {
+  return readCandidate(fs, joinPath(folder, DATA_FILE)).trim()
+}
+
+export interface SyncState {
+  /** Almacén tal como quedó en disco tras la última carga o guardado propio. */
+  base: StoreV2
+  /** Contenido de timerData.json en ese momento ('' si no existía). */
+  text: string
+}
+
+export interface MergeSaveResult {
+  ok: boolean
+  store: StoreV2
+  sync: SyncState
+  merged: boolean
+}
+
+/**
+ * Guarda `ours` y, si el archivo cambió desde la última carga o guardado propio (otra
+ * instancia de After Effects escribió), fusiona antes lo de disco. Se compara el contenido
+ * y no la fecha de modificación: dos escrituras muy seguidas pueden compartir la misma
+ * fecha. Si lo de disco no se puede leer o está corrupto no escribe: sobrescribir borraría
+ * datos que no se pueden fusionar.
+ */
+export function saveWithMerge(
+  fs: CepFsLike,
+  folder: string,
+  ours: StoreV2,
+  sync: SyncState,
+): MergeSaveResult {
+  const current = readMainText(fs, folder)
+  let toWrite = ours
+  let merged = false
+  if (current !== '' && current !== sync.text) {
+    const parsed = current === 'false' ? null : parseStore(current)
+    if (!parsed || parsed.error) return { ok: false, store: ours, sync, merged: false }
+    toWrite = mergeStores(sync.base, ours, parsed.store)
+    merged = true
+  }
+  const json = serializeStore(toWrite)
+  if (!writeDataFile(fs, folder, json)) return { ok: false, store: toWrite, sync, merged }
+  return { ok: true, store: toWrite, sync: { base: toWrite, text: json.trim() }, merged }
 }

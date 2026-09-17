@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createCepFsBackend, createHostBackend } from './dataBackend'
 import { FakeFs } from './testFakeFs'
+import { serializeStore } from './store'
 
 /** evalTS falso: responde según el nombre de la función y registra las llamadas. */
 function fakeHost(responses: Record<string, string>) {
@@ -56,11 +57,46 @@ describe('createHostBackend', () => {
 })
 
 describe('createCepFsBackend', () => {
-  it('saves synchronously through saveNow', () => {
+  const main = 'C:/data/timerData.json'
+  const project = (seconds: number) => ({
+    path: 'C:\\p\\A.aep',
+    title: 'A.aep',
+    totalSeconds: seconds,
+    daily: { '2026-09-16': seconds },
+  })
+
+  function setup() {
     const fs = new FakeFs()
     fs.dirs.add('C:/data')
-    const backend = createCepFsBackend(fs, 'C:\\data')
-    expect(backend.saveNow?.('{"a":1}')).toBe(true)
-    expect(fs.text('C:/data/timerData.json')).toBe('{"a":1}')
+    return { fs, backend: createCepFsBackend(fs, 'C:\\data') }
+  }
+
+  it('saves synchronously through saveMerged', () => {
+    const { fs, backend } = setup()
+    const store = { version: 2 as const, projects: [project(10)] }
+    expect(backend.saveMerged?.(store)).toEqual({ ok: true, store, merged: false })
+    expect(JSON.parse(fs.text(main) as string)).toEqual(store)
+  })
+
+  it('merges time another instance wrote after markLoaded', () => {
+    const { fs, backend } = setup()
+    const loaded = { version: 2 as const, projects: [project(100)] }
+    fs.put(main, serializeStore(loaded))
+    backend.markLoaded?.(loaded)
+    fs.put(main, serializeStore({ version: 2, projects: [project(130)] }))
+    const result = backend.saveMerged?.({ version: 2, projects: [project(160)] })
+    expect(result?.merged).toBe(true)
+    expect(JSON.parse(fs.text(main) as string).projects[0].totalSeconds).toBe(190)
+  })
+
+  it('does not merge its own previous save again', () => {
+    const { fs, backend } = setup()
+    const loaded = { version: 2 as const, projects: [project(100)] }
+    fs.put(main, serializeStore(loaded))
+    backend.markLoaded?.(loaded)
+    backend.saveMerged?.({ version: 2, projects: [project(130)] })
+    const second = backend.saveMerged?.({ version: 2, projects: [project(160)] })
+    expect(second?.merged).toBe(false)
+    expect(JSON.parse(fs.text(main) as string).projects[0].totalSeconds).toBe(160)
   })
 })
