@@ -21,6 +21,7 @@ import {
   upsertProject,
 } from '../lib/store'
 import { escapeForEval, useCSInterface } from '../hooks/useCSInterface'
+import { reduceSnapshot, type SnapshotMachineState } from '../lib/snapshotMachine'
 
 /** Milliseconds between UI ticks while the timer runs. */
 const TICK_MS = 1000
@@ -28,9 +29,6 @@ const TICK_MS = 1000
 const SNAPSHOT_MS = 2000
 /** Autosave cadence while running. */
 const SAVE_INTERVAL_MS = 5000
-/** Consecutive "no project" polls required before tearing down the timer — debounces
- *  the brief null AE reports mid-open (avoids a spurious pause/clear cycle). */
-const NO_PROJECT_CONFIRM_POLLS = 2
 /** Consecutive host write failures before we warn the user. */
 const SAVE_FAIL_THRESHOLD = 3
 
@@ -262,85 +260,45 @@ export function TimerProvider({ children }: { children: ReactNode }) {
    */
   const applySnapshot = useCallback(
     (snap: HostSnapshot) => {
-      const path = snap.projectPath
-
-      // 1. Unsaved / untitled (also how AE surfaces a project mid-conversion).
-      if (snap.unsaved) {
-        emptyPollsRef.current = 0
-        if (runningRef.current) doPause(false)
-        clearCurrent()
-        previousPathRef.current = null
-        // "Unsaved" right after WE opened a project = AE created a converted copy
-        // (project from an older AE version). Keep the real name + guide the user.
-        if (pendingOpenPathRef.current) {
-          const p = pendingOpenPathRef.current
-          pendingOpenPathRef.current = null
-          setConvertedPending({ path: p, title: basename(p) })
-          notify(
-            'This project was made in an older version of After Effects, so a converted copy was opened. Save it to resume tracking.',
-            'info',
-          )
-        } else if (convertedPendingRef.current && !snap.converting) {
-          // The converted copy is gone: closing it makes AE spawn a fresh, EMPTY
-          // "Untitled Project" (still unsaved, so no path change to react to). The
-          // host flags unsaved-with-items as `converting`; unsaved WITHOUT items is
-          // that fresh untitled — drop the stale converted label.
-          setConvertedPending(null)
-        }
-        return
+      const prev: SnapshotMachineState = {
+        previousPath: previousPathRef.current,
+        emptyPolls: emptyPollsRef.current,
+        pendingOpenPath: pendingOpenPathRef.current,
+        convertedPending: convertedPendingRef.current,
       }
-
-      // 2. No project open (debounced against transient nulls during open).
-      if (!path) {
-        const hadContext =
-          previousPathRef.current !== null ||
-          pendingOpenPathRef.current !== null ||
-          convertedPendingRef.current !== null
-        if (!hadContext) return
-        emptyPollsRef.current += 1
-        if (emptyPollsRef.current < NO_PROJECT_CONFIRM_POLLS) return
-        if (runningRef.current) doPause(false)
-        clearCurrent()
-        previousPathRef.current = null
-        pendingOpenPathRef.current = null
-        if (convertedPendingRef.current) setConvertedPending(null)
-        return
-      }
-
-      // A real, saved project is present from here on.
-      emptyPollsRef.current = 0
-      pendingOpenPathRef.current = null
-      const converted = convertedPendingRef.current
-      if (converted) {
-        setConvertedPending(null)
-        // Saved under a NEW path: the fresh entry starts at zero; tell the user where
-        // their old time lives. (Same path = overwrite; auto-resume below handles it.)
-        if (path !== converted.path && projectTotal(storeRef.current, converted.path) > 0) {
-          notify(`Saved as a new project — previous time stays on "${converted.title}".`, 'info')
+      const { state: next, effects } = reduceSnapshot(prev, snap, (p) =>
+        projectTotal(storeRef.current, p),
+      )
+      for (const effect of effects) {
+        switch (effect.type) {
+          case 'pause':
+            doPause(false)
+            break
+          case 'clearCurrent':
+            clearCurrent()
+            break
+          case 'notify':
+            notify(effect.message, effect.kind)
+            break
+          case 'switchProject':
+            commitStore(upsertProject(storeRef.current, effect.path, effect.title))
+            if (effect.autoStart) {
+              beginTiming(effect.path, effect.title)
+            } else {
+              // Known project with no time: make it current but stay paused.
+              currentPathRef.current = effect.path
+              currentTitleRef.current = effect.title
+              setCurrentProject({ path: effect.path, title: effect.title })
+              runningRef.current = false
+              setRunning(false)
+            }
+            break
         }
       }
-
-      // 3. Project changed -> pause previous, switch, auto-resume iff it already has time.
-      if (path !== previousPathRef.current) {
-        if (runningRef.current) doPause(false)
-        previousPathRef.current = path
-        const title = snap.projectName || basename(path)
-        commitStore(upsertProject(storeRef.current, path, title))
-        const saved = projectTotal(storeRef.current, path)
-        if (saved > 0) {
-          beginTiming(path, title)
-        } else {
-          // Known project with no time: make it current but stay paused.
-          currentPathRef.current = path
-          currentTitleRef.current = title
-          setCurrentProject({ path, title })
-          runningRef.current = false
-          setRunning(false)
-        }
-        return
-      }
-
-      // 4. Same saved project, no change: leave running/paused state as-is.
+      previousPathRef.current = next.previousPath
+      emptyPollsRef.current = next.emptyPolls
+      pendingOpenPathRef.current = next.pendingOpenPath
+      if (next.convertedPending !== prev.convertedPending) setConvertedPending(next.convertedPending)
     },
     [doPause, clearCurrent, commitStore, beginTiming, notify, setConvertedPending],
   )
