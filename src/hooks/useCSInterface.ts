@@ -1,4 +1,5 @@
 import { useRef, useCallback, useMemo } from 'react'
+import { createHostStats, hostCallName, recordCall, type HostStats } from '../lib/hostStats'
 
 /** True when running inside Adobe CEP (After Effects panel). */
 function isInsideCEP(): boolean {
@@ -10,6 +11,15 @@ function isInsideCEP(): boolean {
 }
 
 const CEP_AVAILABLE = isInsideCEP()
+
+// Cada evalScript ocupa el hilo principal de After Effects: estos contadores permiten medir
+// cuántas llamadas hace el panel y cuánto tarda AE en atenderlas.
+const hostStats: HostStats = createHostStats(Date.now())
+if (CEP_AVAILABLE) {
+  // Se leen con shared/diagnostics/cdp-eval.mjs por el puerto de public/.debug.
+  const debugWindow = window as Window & { __tkHostStats?: HostStats }
+  debugWindow.__tkHostStats = hostStats
+}
 
 /**
  * Escape a string for injection into an `evalScript` single-quoted argument, matching
@@ -79,13 +89,17 @@ export function useCSInterface() {
           resolve('')
           return
         }
+        const startedAt = performance.now()
         cs.evalScript(script, (result: string) => {
+          const ms = performance.now() - startedAt
           // CEP returns this sentinel when the ExtendScript engine throws.
           if (typeof result === 'string' && result.indexOf('EvalScript error') === 0) {
             console.error('[host] evalScript failed:', script, result)
+            recordCall(hostStats, hostCallName(script), ms, true)
             resolve('')
             return
           }
+          recordCall(hostStats, hostCallName(script), ms, result === '')
           resolve(result)
         })
       }),
