@@ -7,6 +7,7 @@ import {
   writeDataFile,
   type CepFsLike,
 } from './dataFile'
+import { HOST_CALL_TIMEOUT_MS, withTimeout } from './withTimeout'
 
 /** Dónde se leen y escriben los datos del timer. */
 export interface DataBackend {
@@ -31,15 +32,17 @@ export function createCepFsBackend(fs: CepFsLike, folder: string): DataBackend {
 
 /** Respaldo para motores CEP sin window.cep.fs: escribe desde ExtendScript, en el hilo de AE. */
 export function createHostBackend(evalTS: (fnCall: string) => Promise<string>): DataBackend {
+  // Una llamada sin respuesta bloquearía la cola de guardados de TimerContext.
+  const call = (fnCall: string) => withTimeout(evalTS(fnCall), HOST_CALL_TIMEOUT_MS, '')
   return {
     kind: 'host',
     load: async () => {
-      const main = await evalTS('loadData()')
+      const main = await call('loadData()')
       if (isUsableJsonText(main)) return main
-      const backup = await evalTS('loadBackupData()')
+      const backup = await call('loadBackupData()')
       return chooseLoadResult([main, backup])
     },
-    save: async (json) => (await evalTS(`saveData('${escapeForEval(json)}')`)) === 'true',
-    saveBackupOnce: async (raw) => (await evalTS(`saveBackup('${escapeForEval(raw)}')`)) === 'true',
+    save: async (json) => (await call(`saveData('${escapeForEval(json)}')`)) === 'true',
+    saveBackupOnce: async (raw) => (await call(`saveBackup('${escapeForEval(raw)}')`)) === 'true',
   }
 }

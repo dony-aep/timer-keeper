@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createCepFsBackend, createHostBackend } from './dataBackend'
 import { FakeFs } from './testFakeFs'
 
@@ -40,6 +40,18 @@ describe('createHostBackend', () => {
   it('reports a read error when neither file could be read', async () => {
     const host = fakeHost({ loadData: 'false', loadBackupData: 'false' })
     expect(await createHostBackend(host.evalTS).load()).toBe('false')
+  })
+
+  it('treats a save that never answers as failed after 60 s', async () => {
+    vi.useFakeTimers()
+    try {
+      const backend = createHostBackend(() => new Promise<string>(() => {}))
+      const saved = backend.save('{}')
+      vi.advanceTimersByTime(60000)
+      expect(await saved).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 

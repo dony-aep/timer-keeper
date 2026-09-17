@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Data file could be lost on a failed save**: if replacing the data file failed halfway, both the old and the new copy could be deleted. Saves now keep the previous version as `timerData.bak.json`, restore it when a save fails, and loading falls back to it.
+- **Project detection could stop for the whole session**: if After Effects never answered one of the panel's checks, the panel stopped noticing project changes until it was reloaded. Checks now give up after 60 seconds and try again.
 
 ## [4.0.1] - 2026-09-10
 

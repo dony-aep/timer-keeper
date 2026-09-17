@@ -25,6 +25,7 @@ import { reduceSnapshot, type SnapshotMachineState } from '../lib/snapshotMachin
 import { createCepFsBackend, createHostBackend, type DataBackend } from '../lib/dataBackend'
 import { isCepFs } from '../lib/dataFile'
 import { nextPollDelay, sameSnapshot, TRIGGER_MIN_GAP_MS } from '../lib/polling'
+import { HOST_CALL_TIMEOUT_MS, withTimeout } from '../lib/withTimeout'
 
 /** Milliseconds between UI ticks while the timer runs. */
 const TICK_MS = 1000
@@ -345,7 +346,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
   /** Fetch + parse a fresh host snapshot. Returns null off-host or on malformed data. */
   const fetchSnapshot = useCallback(async (): Promise<HostSnapshot | null> => {
-    const raw = await cep.evalTS('getSnapshot()')
+    const raw = await withTimeout(cep.evalTS('getSnapshot()'), HOST_CALL_TIMEOUT_MS, '', () =>
+      console.warn('[host] getSnapshot timed out after 60 s'),
+    )
     try {
       const obj = JSON.parse(raw) as Partial<HostSnapshot>
       return {
