@@ -5,6 +5,14 @@ Todos los cambios notables de Timer Keeper se documentan en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Cambiado
+- **Autoguardado más ligero**: guardar tu tiempo ya no se ejecuta dentro de After Effects. El panel escribe el archivo por sí mismo cada 30 segundos y cada vez que pausas, cambias de proyecto o cierras el panel, en vez de pedirle a After Effects que lo haga cada 5 segundos.
+
+### Corregido
+- **El archivo de datos podía perderse al fallar un guardado**: si reemplazar el archivo fallaba a mitad, podían borrarse tanto la copia antigua como la nueva. Ahora cada guardado conserva la versión anterior como `timerData.bak.json`, la restaura si algo falla y la carga la usa como respaldo.
+
 ## [4.0.1] - 2026-09-10
 
 ### Cambiado

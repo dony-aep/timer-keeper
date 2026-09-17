@@ -83,7 +83,7 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
 > Probada en Windows 11 con After Effects 2026 y en macOS 12 Monterey con After Effects 2022.
 
 ## Características Principales
-- **Seguimiento en tiempo real:** inicia/pausa el timer para el proyecto actual con un clic; el tiempo se guarda continuamente mientras corre (autoguardado cada 5 s, y al pausar/cerrar).
+- **Seguimiento en tiempo real:** inicia/pausa el timer para el proyecto actual con un clic; el tiempo se guarda mientras corre (cada 30 s, y cada vez que pausas, cambias de proyecto o cierras el panel).
 - **Detección automática de proyecto:** pausa el proyecto anterior y auto-inicia el recién abierto si ya tiene tiempo registrado; pausa preventiva para proyectos sin guardar o en conversión de versión.
 - **Lista de proyectos:** búsqueda por nombre, doble clic para abrir un proyecto (e iniciar su cronometraje), eliminar un proyecto y sus datos, actualizar desde disco.
 - **Reiniciar:** borra el tiempo acumulado del proyecto seleccionado (con confirmación).
@@ -109,7 +109,7 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
 6. **Menú flyout:** abre el menú del panel (arriba a la derecha) para actualizar la lista de proyectos o abrir la documentación en línea.
 
 ## Datos
-Los datos del temporizador se guardan como JSON en `Documents/Adobe/TimerData/timerData.json`, escrito de forma atómica (archivo temporal + renombrado) por el host de ExtendScript. Los formatos antiguos de versiones anteriores se detectan y migran automáticamente la primera vez que abres la extensión, con una copia de respaldo escrita antes de la migración.
+Los datos del temporizador se guardan como JSON en `Documents/Adobe/TimerData/timerData.json`, escrito por el panel a través de un archivo temporal, conservando la versión anterior como `timerData.bak.json`. Los formatos antiguos de versiones anteriores se detectan y migran automáticamente la primera vez que abres la extensión, con una copia de respaldo escrita antes de la migración.
 
 ## Historial de Versiones
 Para el historial detallado de versiones y registro de cambios, consulta [CHANGELOG_ES.md](CHANGELOG_ES.md).

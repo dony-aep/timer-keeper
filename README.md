@@ -83,7 +83,7 @@ After `npm run deploy`, restart After Effects to load the updated panel.
 > Tested on Windows 11 with After Effects 2026 and on macOS 12 Monterey with After Effects 2022.
 
 ## Main Features
-- **Real-time tracking:** start/pause the timer for the current project with a single click; time is saved continuously while it runs (autosave every 5 s, and on pause/close).
+- **Real-time tracking:** start/pause the timer for the current project with a single click; time is saved while it runs (every 30 s, and whenever you pause, switch projects or close the panel).
 - **Automatic project detection:** pauses the previous project and auto-starts the newly opened one if it already has tracked time; preventive pause for unsaved or version-converting projects.
 - **Project list:** search by name, double-click to open a project (and start timing it), delete a project and its data, refresh from disk.
 - **Reset:** clear the accumulated time for the selected project (with confirmation).
@@ -109,7 +109,7 @@ After `npm run deploy`, restart After Effects to load the updated panel.
 6. **Flyout menu:** open the panel's menu (top-right) to refresh the project list or open the online documentation.
 
 ## Data
-Timer data is stored as JSON in `Documents/Adobe/TimerData/timerData.json`, written atomically (temp file + rename) by the ExtendScript host. Older formats from previous versions are detected and migrated automatically the first time you open the extension, with a backup copy written before the migration.
+Timer data is stored as JSON in `Documents/Adobe/TimerData/timerData.json`, written by the panel through a temp file, keeping the previous version as `timerData.bak.json`. Older formats from previous versions are detected and migrated automatically the first time you open the extension, with a backup copy written before the migration.
 
 ## Version History
 For detailed version history and changelog, please see [CHANGELOG.md](CHANGELOG.md).

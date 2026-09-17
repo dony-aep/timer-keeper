@@ -22,13 +22,15 @@ import {
 } from '../lib/store'
 import { escapeForEval, useCSInterface } from '../hooks/useCSInterface'
 import { reduceSnapshot, type SnapshotMachineState } from '../lib/snapshotMachine'
+import { createCepFsBackend, createHostBackend, type DataBackend } from '../lib/dataBackend'
+import { isCepFs } from '../lib/dataFile'
 
 /** Milliseconds between UI ticks while the timer runs. */
 const TICK_MS = 1000
 /** Milliseconds between host snapshot polls. */
 const SNAPSHOT_MS = 2000
-/** Autosave cadence while running. */
-const SAVE_INTERVAL_MS = 5000
+/** Autosave cadence while running; pausing, switching projects and closing the panel also save. */
+const SAVE_INTERVAL_MS = 30000
 /** Consecutive host write failures before we warn the user. */
 const SAVE_FAIL_THRESHOLD = 3
 
@@ -142,6 +144,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   // read can never let an empty in-memory store overwrite good data on disk.
   const canPersistRef = useRef(false)
   const saveFailuresRef = useRef(0)
+  const backendRef = useRef<DataBackend | null>(null)
+  const backendPromiseRef = useRef<Promise<DataBackend | null> | null>(null)
+  const saveInFlightRef = useRef(false)
+  const pendingJsonRef = useRef<string | null>(null)
   // Conversion tracking: the path we just asked AE to open (so an ensuing "unsaved"
   // snapshot can be recognised as that project's converted copy), and its promotion.
   const pendingOpenPathRef = useRef<string | null>(null)
@@ -164,29 +170,64 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
   const clearNotice = useCallback(() => setNotice(null), [])
 
+  // Se decide una sola vez dónde se escribe: window.cep.fs corre en el proceso del panel
+  // y no ocupa el hilo principal de After Effects; el host queda como respaldo.
+  const resolveBackend = useCallback((): Promise<DataBackend | null> => {
+    if (!cep.isCEP) return Promise.resolve(null)
+    if (!backendPromiseRef.current) {
+      backendPromiseRef.current = (async () => {
+        let backend: DataBackend = createHostBackend(cep.evalTS)
+        const fs = (window as Window & { cep?: { fs?: unknown } }).cep?.fs
+        if (isCepFs(fs)) {
+          const folder = (await cep.evalTS('getDataFolderPath()')).trim()
+          if (folder !== '' && folder !== 'false') backend = createCepFsBackend(fs, folder)
+        }
+        backendRef.current = backend
+        // Permite comprobar desde el depurador remoto qué backend quedó activo.
+        const debugWindow = window as Window & { __tkDataBackend?: string }
+        debugWindow.__tkDataBackend = backend.kind
+        return backend
+      })()
+    }
+    return backendPromiseRef.current
+  }, [cep])
+
   /**
-   * Persist the store to disk (host does the atomic temp+rename write). Blocked until
-   * a load has succeeded — never clobber good data after a read error. Repeated
-   * host-side write failures surface a one-time warning so saves can't fail silently.
+   * Persist the store to disk. Blocked until a load has succeeded — never clobber good
+   * data after a read error. Repeated write failures surface a one-time warning so saves
+   * can't fail silently.
    */
   const persist = useCallback(
     async (s: StoreV2) => {
       if (!cep.isCEP || !canPersistRef.current) return
-      const json = serializeStore(s)
-      const res = await cep.evalTS(`saveData('${escapeForEval(json)}')`)
-      if (res === 'true') {
-        saveFailuresRef.current = 0
-        return
-      }
-      saveFailuresRef.current += 1
-      if (saveFailuresRef.current === SAVE_FAIL_THRESHOLD) {
-        notify(
-          'Unable to save timing data to disk. Your recent time may not be persisted.',
-          'error',
-        )
+      const backend = await resolveBackend()
+      if (!backend) return
+      pendingJsonRef.current = serializeStore(s)
+      // Una sola escritura a la vez: si AE está ocupado, los guardados no se encolan; el
+      // bucle en curso recoge el JSON más reciente.
+      if (saveInFlightRef.current) return
+      saveInFlightRef.current = true
+      try {
+        while (pendingJsonRef.current !== null) {
+          const json: string = pendingJsonRef.current
+          pendingJsonRef.current = null
+          if (await backend.save(json)) {
+            saveFailuresRef.current = 0
+            continue
+          }
+          saveFailuresRef.current += 1
+          if (saveFailuresRef.current === SAVE_FAIL_THRESHOLD) {
+            notify(
+              'Unable to save timing data to disk. Your recent time may not be persisted.',
+              'error',
+            )
+          }
+        }
+      } finally {
+        saveInFlightRef.current = false
       }
     },
-    [cep, notify],
+    [cep, notify, resolveBackend],
   )
 
   /**
@@ -340,7 +381,8 @@ export function TimerProvider({ children }: { children: ReactNode }) {
    * can't let an empty store clobber good data on the next save.
    */
   const loadFromDisk = useCallback(async () => {
-    const raw = await cep.evalTS('loadData()')
+    const backend = await resolveBackend()
+    const raw = backend ? await backend.load() : ''
     const rawTrim = (raw ?? '').trim()
     const result = parseStore(raw)
     if (rawTrim === 'false' || result.error === true) {
@@ -351,16 +393,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       )
       return result
     }
-    if (result.migratedFrom === 'v1' || result.migratedFrom === 'legacy') {
+    if (backend && (result.migratedFrom === 'v1' || result.migratedFrom === 'legacy')) {
       // Back up the ORIGINAL raw payload once, then persist the migrated v2 store.
-      await cep.evalTS(`saveBackup('${escapeForEval(raw)}')`)
-      await cep.evalTS(`saveData('${escapeForEval(serializeStore(result.store))}')`)
+      await backend.saveBackupOnce(raw)
+      await backend.save(serializeStore(result.store))
     }
     commitStore(result.store)
     canPersistRef.current = true
     saveFailuresRef.current = 0
     return result
-  }, [cep, commitStore, notify])
+  }, [resolveBackend, commitStore, notify])
 
   // --- Public actions ---
 
@@ -502,7 +544,14 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         tick()
         runningRef.current = false
       }
-      persist(storeRef.current)
+      // Síncrono cuando hay cep.fs: un evalScript lanzado al descargarse el panel puede
+      // no llegar a ejecutarse.
+      const backend = backendRef.current
+      if (backend?.saveNow && cep.isCEP && canPersistRef.current) {
+        backend.saveNow(serializeStore(storeRef.current))
+        return
+      }
+      void persist(storeRef.current)
     }
     const onHidden = () => {
       if (document.visibilityState === 'hidden') {
@@ -516,7 +565,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('beforeunload', flush)
       document.removeEventListener('visibilitychange', onHidden)
     }
-  }, [tick, persist])
+  }, [tick, persist, cep])
 
   const elapsedSeconds = currentProject
     ? Math.floor(projectTotal(store, currentProject.path))

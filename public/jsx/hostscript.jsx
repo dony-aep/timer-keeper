@@ -377,8 +377,44 @@ $.global.TimerKeeper = (function () {
     };
 
     /**
+     * loadBackupData() -> contenido de timerData.bak.json o, si falta o está vacío,
+     * de timerData_temp.json. "{}" si no hay ninguno; "false" si alguno existía y no
+     * se pudo leer. Lo usa el panel cuando timerData.json falta o está corrupto; el
+     * panel valida el JSON.
+     * @returns {String}
+     */
+    api.loadBackupData = function () {
+        var names = ["timerData.bak.json", "timerData_temp.json"];
+        var sawError = false;
+        for (var i = 0; i < names.length; i++) {
+            try {
+                var candidate = new File(dataFolder.fsName + "/" + names[i]);
+                if (!candidate.exists) {
+                    continue;
+                }
+                candidate.encoding = "UTF8";
+                if (!candidate.open("r")) {
+                    sawError = true;
+                    continue;
+                }
+                var text = candidate.read();
+                candidate.close();
+                text = text.replace(/^\s+|\s+$/g, "");
+                if (text !== "") {
+                    return text;
+                }
+            } catch (readErr) {
+                $.writeln("TimerKeeper: error leyendo " + names[i] + ": " + readErr.message);
+                sawError = true;
+            }
+        }
+        return sawError ? "false" : "{}";
+    };
+
+    /**
      * saveData(jsonDataString) -> "true"/"false".
-     * Escritura atomica: temp + rename. Encoding UTF8.
+     * Escribe el temporal, mueve el original a timerData.bak.json y renombra el
+     * temporal. Encoding UTF8. Respaldo para motores CEP sin window.cep.fs.
      * @param {String} jsonDataString
      * @returns {String}
      */
@@ -418,39 +454,41 @@ $.global.TimerKeeper = (function () {
                 return "false";
             }
 
-            // Eliminar el archivo original si existe (para permitir el rename).
-            if (dataFile.exists) {
-                try {
-                    var removeResult = dataFile.remove();
-                    if (!removeResult) {
-                        $.writeln("TimerKeeper: no se pudo eliminar el archivo antiguo: " + dataFile.error + ". Intentando rename encima.");
-                    }
-                } catch (removeError) {
-                    $.writeln("TimerKeeper: error eliminando archivo: " + removeError.message + ". Intentando rename encima.");
+            // Objetos File nuevos: rename() cambia la ruta del propio objeto y dataFile
+            // se reutiliza en loadData.
+            var mainFile = new File(dataFolder.fsName + "/timerData.json");
+            var backupFile = new File(dataFolder.fsName + "/timerData.bak.json");
+            var hadMain = mainFile.exists;
+
+            if (hadMain) {
+                if (backupFile.exists && !backupFile.remove()) {
+                    $.writeln("TimerKeeper: no se pudo borrar timerData.bak.json: " + backupFile.error);
+                    tempDataFile.remove();
+                    return "false";
+                }
+                // El original pasa a ser la copia anterior en vez de borrarse: si el
+                // renombrado siguiente falla, los datos siguen en disco.
+                if (!mainFile.rename("timerData.bak.json")) {
+                    $.writeln("TimerKeeper: no se pudo mover el original a .bak: " + mainFile.error);
+                    tempDataFile.remove();
+                    return "false";
                 }
             }
 
-            // Rename atomico del temporal al nombre final.
-            var renameResult = tempDataFile.rename("timerData.json");
-            if (!renameResult) {
+            if (!tempDataFile.rename("timerData.json")) {
                 $.writeln("TimerKeeper: no se pudo renombrar el temporal: " + tempDataFile.error);
-                if (tempDataFile.exists) {
-                    tempDataFile.remove();
+                if (hadMain) {
+                    var restoreFile = new File(dataFolder.fsName + "/timerData.bak.json");
+                    restoreFile.rename("timerData.json");
                 }
+                // El temporal se conserva: puede ser la copia más reciente.
                 return "false";
             }
 
             return "true";
         } catch (e) {
+            // Sin limpiar el temporal: si está completo, la carga lo usa como respaldo.
             $.writeln("TimerKeeper: error guardando datos: " + e.message);
-            try {
-                var tempFileOnError = new File(dataFolder.fsName + "/timerData_temp.json");
-                if (tempFileOnError.exists) {
-                    tempFileOnError.remove();
-                }
-            } catch (cleanupErr) {
-                // Ignorar error de limpieza.
-            }
             return "false";
         }
     };
