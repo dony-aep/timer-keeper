@@ -9,12 +9,12 @@
     "build": "tsc -b && vite build",
     "deploy": "tsc -b && vite build && node scripts/deploy.mjs",
     "package": "node scripts/package.mjs",
+    "icons": "node scripts/update-icon-font.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/google-sans-flex": "^5.2.3",
-    "material-symbols": "^0.45.5",
     "react": "^19.2.7",
     "react-aria-components": "^1.18.0",
     "react-dom": "^19.2.7"

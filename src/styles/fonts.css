@@ -1,9 +1,35 @@
 /* ============================================================
    Timer Keeper — self-hosted fonts (no external requests).
    - Google Sans Flex (variable, wght 1..1000) via @fontsource.
-   - Material Symbols, OUTLINED variant only (FILL axis animated
-     0 -> 1 on the transport key while the timer runs).
+   - Material Symbols Outlined, subset to the icons listed in
+     src/components/ui/iconNames.ts (regenerate: npm run icons).
+     FILL axis animated 0 -> 1 on the transport key while running.
    ============================================================ */
 
 @import '@fontsource-variable/google-sans-flex';
-@import 'material-symbols/outlined.css';
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('./fonts/material-symbols-outlined-subset.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+}

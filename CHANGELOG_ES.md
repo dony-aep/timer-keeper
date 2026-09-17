@@ -12,6 +12,7 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 - **Menos peticiones a After Effects**: el panel comprueba qué proyecto está abierto cada 5 segundos mientras cuenta y cada 10 en pausa, en vez de cada 2, y lo comprueba al momento cuando haces clic o pasas el ratón por el panel.
 - **Menos trabajo mientras el timer cuenta**: la lista de proyectos y el gráfico del Dashboard se refrescan cada vez que se guarda tu tiempo (cada 30 segundos) en vez de cada segundo. El reloj, la fila del proyecto activo y las cifras de Total y Hoy siguen actualizándose cada segundo.
 - **Indicador de marcha más tranquilo**: los dos puntos del reloj se atenúan un segundo sí y otro no en vez de pulsar sin parar, así el panel deja de redibujarse continuamente mientras el timer cuenta.
+- **Descarga mucho más pequeña**: la fuente de iconos incluye solo los 23 iconos que usa el panel (unos 7 KB en vez de 4 MB), así que el zip de la release pesa mucho menos y el panel tiene menos que cargar al abrirse.
 
 ### Corregido
 - **El archivo de datos podía perderse al fallar un guardado**: si reemplazar el archivo fallaba a mitad, podían borrarse tanto la copia antigua como la nueva. Ahora cada guardado conserva la versión anterior como `timerData.bak.json`, la restaura si algo falla y la carga la usa como respaldo.

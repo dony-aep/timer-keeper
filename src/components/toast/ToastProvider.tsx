@@ -10,6 +10,7 @@ import {
 import { Button as AriaButton } from 'react-aria-components'
 import { useTimer, type NoticeKind } from '../../context/TimerContext'
 import { Icon } from '../ui/Icon'
+import type { IconName } from '../ui/iconNames'
 import styles from './Toast.module.css'
 
 const EXIT_MS = 220
@@ -28,7 +29,7 @@ function autoDismissDelay(message: string, kind: NoticeKind): number {
 }
 
 /** Monochrome vocabulary: state is icon + luminance, never hue. */
-const KIND_ICON: Record<NoticeKind, string> = {
+const KIND_ICON: Record<NoticeKind, IconName> = {
   success: 'check_circle',
   warning: 'warning',
   error: 'error',

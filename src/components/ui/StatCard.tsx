@@ -1,8 +1,9 @@
 import { Icon } from './Icon'
+import type { IconName } from './iconNames'
 import styles from './StatCard.module.css'
 
 interface StatCardProps {
-  icon: string
+  icon: IconName
   label: string
   value: string
   /** Optional secondary line, e.g. a descriptive duration. */

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fewer requests to After Effects**: the panel checks which project is open every 5 seconds while timing and every 10 seconds while paused, instead of every 2 seconds, and checks right away when you click or move the mouse over the panel.
 - **Less work while the timer runs**: the project list and the Dashboard chart now refresh each time your time is saved (every 30 seconds) instead of every second. The clock, the active project's row and the Total and Today figures still update every second.
 - **Calmer running indicator**: the clock's colons now dim every other second instead of pulsing continuously, so the panel no longer redraws all the time while the timer runs.
+- **Much smaller download**: the icon font now contains only the 23 icons the panel uses (about 7 KB instead of 4 MB), so the release zip shrinks and the panel has less to load when it opens.
 
 ### Fixed
 - **Data file could be lost on a failed save**: if replacing the data file failed halfway, both the old and the new copy could be deleted. Saves now keep the previous version as `timerData.bak.json`, restore it when a save fails, and loading falls back to it.

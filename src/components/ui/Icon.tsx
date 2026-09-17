@@ -1,8 +1,9 @@
 import styles from './Icon.module.css'
+import type { IconName } from './iconNames'
 
 interface IconProps {
   /** Material Symbols glyph name, e.g. "play_arrow". */
-  name: string
+  name: IconName
   /** Font size in px (Material Symbols are square). */
   size?: number
   /** Animate the FILL axis 0 -> 1 (used by the transport key while running). */

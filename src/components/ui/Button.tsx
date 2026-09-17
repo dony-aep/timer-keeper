@@ -1,6 +1,7 @@
 import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
+import type { IconName } from './iconNames'
 import styles from './controls.module.css'
 
 export type ButtonVariant = 'key' | 'outline' | 'ghost'
@@ -8,7 +9,7 @@ export type ButtonVariant = 'key' | 'outline' | 'ghost'
 interface ButtonProps extends Omit<AriaButtonProps, 'className' | 'children'> {
   /** 'key' = inverted primary (console key), 'outline' = hairline, 'ghost' = quiet. */
   variant?: ButtonVariant
-  icon?: string
+  icon?: IconName
   /** Animate the icon's FILL axis (0 -> 1). */
   iconFilled?: boolean
   className?: string
@@ -34,7 +35,7 @@ export function Button({
 }
 
 interface IconButtonProps extends Omit<AriaButtonProps, 'className' | 'children' | 'aria-label'> {
-  icon: string
+  icon: IconName
   /** Required — icon-only controls must always be named. */
   'aria-label': string
   size?: number

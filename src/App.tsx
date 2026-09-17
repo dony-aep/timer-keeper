@@ -14,7 +14,7 @@ const DOC_URL = 'https://toolsbydonyaep.vercel.app/extension/timer-keeper'
 const TABS = [
   { id: 'timer', label: 'Timer', icon: 'timer', Panel: TimerTab },
   { id: 'dashboard', label: 'Dashboard', icon: 'monitoring', Panel: DashboardTab },
-]
+] as const
 
 export function App() {
   const { openURL, setPanelFlyout, addEventListener, removeEventListener } = useCSInterface()
