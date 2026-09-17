@@ -6,9 +6,10 @@
  *        npm run sign -- --verify  only verify the existing zxp
  *        npm run sign -- --no-build  skip the build (sign whatever dist/ holds)
  *
- * Environment: TK_CERT_P12 (path, default tools/certificate.p12), TK_CERT_PASSWORD,
- * TK_ZXPSIGNCMD (path to the tool, default tools/ZXPSignCmd.exe or tools/ZXPSignCmd),
- * TK_TSA (timestamp server, default http://timestamp.digicert.com).
+ * Environment: TK_CERT_P12 (path, default tools/certificate.p12), TK_CERT_PASSWORD or
+ * TK_CERT_PASSWORD_FILE (a file holding just the password — keeps it out of the shell
+ * history), TK_ZXPSIGNCMD (path to the tool, default tools/ZXPSignCmd.exe or
+ * tools/ZXPSignCmd), TK_TSA (timestamp server, default http://timestamp.digicert.com).
  * Certificate fields for --cert: TK_CERT_COUNTRY, TK_CERT_STATE, TK_CERT_ORG, TK_CERT_NAME.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'fs'
@@ -30,8 +31,25 @@ const zxpPath = resolve(releasesDir, `timer-keeper-v${pkg.version}.zxp`)
 const toolName = process.platform === 'win32' ? 'ZXPSignCmd.exe' : 'ZXPSignCmd'
 const tool = resolve(process.env.TK_ZXPSIGNCMD ?? join(toolsDir, toolName))
 const certPath = resolve(process.env.TK_CERT_P12 ?? join(toolsDir, 'certificate.p12'))
-const password = process.env.TK_CERT_PASSWORD
 const tsa = process.env.TK_TSA ?? 'http://timestamp.digicert.com'
+
+// Leerla de un archivo evita que la contraseña quede en el historial del shell.
+function readPassword() {
+  if (process.env.TK_CERT_PASSWORD) return process.env.TK_CERT_PASSWORD
+  const file = process.env.TK_CERT_PASSWORD_FILE
+  if (!file) return undefined
+  if (!existsSync(file)) {
+    console.error(`ERROR: TK_CERT_PASSWORD_FILE points to ${file}, which does not exist.`)
+    process.exit(1)
+  }
+  const value = readFileSync(file, 'utf-8').trim()
+  if (value === '') {
+    console.error(`ERROR: ${file} is empty.`)
+    process.exit(1)
+  }
+  return value
+}
+const password = readPassword()
 
 if (!existsSync(tool)) {
   console.error(`ERROR: ZXPSignCmd not found at ${tool}`)
@@ -56,7 +74,7 @@ function runTool(toolArgs) {
 
 if (has('--cert')) {
   if (!password) {
-    console.error('ERROR: set TK_CERT_PASSWORD before creating a certificate.')
+    console.error('ERROR: set TK_CERT_PASSWORD_FILE (or TK_CERT_PASSWORD) before creating a certificate.')
     process.exit(1)
   }
   if (existsSync(certPath)) {
@@ -66,8 +84,9 @@ if (has('--cert')) {
   mkdirSync(toolsDir, { recursive: true })
   const country = process.env.TK_CERT_COUNTRY ?? 'CO'
   const state = process.env.TK_CERT_STATE ?? 'Bogota'
-  const org = process.env.TK_CERT_ORG ?? 'dony.'
-  const name = process.env.TK_CERT_NAME ?? 'dony.'
+  // dony-aep y no "dony.": el punto final complica los campos del certificado.
+  const org = process.env.TK_CERT_ORG ?? 'dony-aep'
+  const name = process.env.TK_CERT_NAME ?? 'dony-aep'
   // 10 años: un certificado caducado sin sello de tiempo impide que la extensión arranque.
   runTool(['-selfSignedCert', country, state, org, name, password, certPath, '-validityDays', '3650'])
   console.log(`Self-signed certificate created: ${certPath}`)
@@ -85,7 +104,7 @@ if (has('--verify')) {
 }
 
 if (!password) {
-  console.error('ERROR: set TK_CERT_PASSWORD with the certificate password.')
+  console.error('ERROR: set TK_CERT_PASSWORD_FILE (or TK_CERT_PASSWORD) with the certificate password.')
   process.exit(1)
 }
 if (!existsSync(certPath)) {
