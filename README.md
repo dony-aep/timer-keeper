@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
-[![Version](https://img.shields.io/badge/version-4.0.1-white.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.1.0-white.svg)](CHANGELOG.md)
 [![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibility)
 [![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibility)
 [![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#tech-stack)
@@ -16,7 +16,14 @@ Timer Keeper is an Adobe After Effects extension that tracks the time you spend 
 Formerly distributed as "AE TimerKeeper", the extension has been rebuilt from the ground up as **Timer Keeper**.
 
 ## Current Version
-**v4.0.1** - macOS fixes: on After Effects 2022 the panel no longer opens empty, and buttons and tabs respond to clicks. See [CHANGELOG.md](CHANGELOG.md).
+**v4.1.0** - Lighter on After Effects: saving and checking the open project ask far less of it, sleep no longer counts as work, and the download is much smaller. See [CHANGELOG.md](CHANGELOG.md).
+
+## What's New in v4.1.0
+- **Lighter on After Effects:** the panel writes your time itself every 30 s instead of asking After Effects every 5 s, and checks the open project every 5 s while timing (10 s while paused) instead of every 2 s.
+- **Safer data:** every save keeps the previous version as `timerData.bak.json` and falls back to it if the main file goes missing or corrupt.
+- **Sleep no longer counts as work:** gaps longer than 5 minutes are skipped, with a notice.
+- **Two After Effects windows** tracking at once no longer overwrite each other's time.
+- **Much smaller download:** the icon font now ships only the icons the panel uses (about 7 KB instead of 4 MB).
 
 ## What's New in v4.0.1
 - **Panel loads on macOS:** on After Effects 2022 the panel no longer opens empty.

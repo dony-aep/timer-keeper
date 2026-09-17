@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
-[![Versión](https://img.shields.io/badge/versión-4.0.1-white.svg)](CHANGELOG_ES.md)
+[![Versión](https://img.shields.io/badge/versión-4.1.0-white.svg)](CHANGELOG_ES.md)
 [![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibilidad)
 [![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibilidad)
 [![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#stack-tecnológico)
@@ -16,7 +16,14 @@ Timer Keeper es una extensión para Adobe After Effects que rastrea el tiempo qu
 Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde cero como **Timer Keeper**.
 
 ## Versión Actual
-**v4.0.1** - Correcciones para macOS: en After Effects 2022 el panel ya no abre vacío, y los botones y pestañas responden a los clics. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+**v4.1.0** - Más ligera para After Effects: guardar y comprobar el proyecto abierto le piden mucho menos trabajo, la suspensión ya no cuenta como tiempo trabajado y la descarga pesa mucho menos. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+
+## Novedades en v4.1.0
+- **Más ligera para After Effects:** el panel escribe tu tiempo por sí mismo cada 30 s en vez de pedírselo a After Effects cada 5 s, y comprueba el proyecto abierto cada 5 s mientras cuenta (10 s en pausa) en vez de cada 2 s.
+- **Datos más seguros:** cada guardado conserva la versión anterior como `timerData.bak.json` y la carga recurre a ella si el archivo principal falta o está corrupto.
+- **La suspensión ya no cuenta como trabajo:** los huecos de más de 5 minutos se descartan, con aviso.
+- **Dos After Effects abiertos** registrando a la vez ya no se pisan el tiempo.
+- **Descarga mucho más pequeña:** la fuente de iconos incluye solo los que usa el panel (unos 7 KB en vez de 4 MB).
 
 ## Novedades en v4.0.1
 - **El panel carga en macOS:** en After Effects 2022 ya no abre vacío.

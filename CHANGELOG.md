@@ -5,7 +5,7 @@ All notable changes to Timer Keeper will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.1.0] - 2026-09-16
 
 ### Changed
 - **Lighter autosave**: saving your time no longer runs inside After Effects. The panel writes the file itself every 30 seconds and whenever you pause, switch projects or close the panel, instead of asking After Effects to do it every 5 seconds.
