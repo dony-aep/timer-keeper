@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "deploy": "tsc -b && vite build && node scripts/deploy.mjs",
     "package": "node scripts/package.mjs",
+    "sign": "node scripts/sign.mjs",
     "icons": "node scripts/update-icon-font.mjs",
     "preview": "vite preview",
     "test": "vitest run"

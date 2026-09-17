@@ -69,6 +69,7 @@ npm run build      # chequeo de tipos + build de producción a dist/
 npm run deploy     # build + copia a %APPDATA%\Adobe\CEP\extensions (instalación local)
 npm run package    # build + zip de dist/ en releases/ para distribución
 npm run icons      # regenera la fuente de iconos tras añadir uno a iconNames.ts
+npm run sign       # build + .zxp firmado en releases/ (requiere ZXPSignCmd y un certificado)
 ```
 
 Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.

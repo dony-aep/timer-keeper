@@ -69,6 +69,7 @@ npm run build      # type-check + production build to dist/
 npm run deploy     # build + copy to %APPDATA%\Adobe\CEP\extensions (local install)
 npm run package    # build + zip dist/ into releases/ for distribution
 npm run icons      # regenerate the icon font after adding an icon to iconNames.ts
+npm run sign       # build + signed .zxp in releases/ (needs ZXPSignCmd and a certificate)
 ```
 
 After `npm run deploy`, restart After Effects to load the updated panel.

@@ -15,3 +15,7 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Herramienta de firma y certificados (nunca al repositorio)
+tools/
+*.p12
