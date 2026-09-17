@@ -565,24 +565,29 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     void loadFromDisk()
   }, [loadFromDisk])
 
-  // Host snapshot polling: slower while paused; see src/lib/polling.ts.
+  // Initial host snapshot.
+  useEffect(() => {
+    void pollSnapshot()
+  }, [pollSnapshot])
+
+  // Host snapshot polling: slower while paused; see src/lib/polling.ts. `running` en las
+  // dependencias reprograma el sondeo al arrancar o pausar: si no, tras Start seguiría
+  // pendiente el temporizador de 10 s programado en pausa.
   useEffect(() => {
     let cancelled = false
     let timer = 0
-    const loop = async () => {
-      await pollSnapshot()
-      if (cancelled) return
-      timer = window.setTimeout(
-        () => void loop(),
-        nextPollDelay(runningRef.current, emptyPollsRef.current),
-      )
+    const schedule = () => {
+      timer = window.setTimeout(async () => {
+        await pollSnapshot()
+        if (!cancelled) schedule()
+      }, nextPollDelay(runningRef.current, emptyPollsRef.current))
     }
-    void loop()
+    schedule()
     return () => {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [pollSnapshot])
+  }, [pollSnapshot, running])
 
   // AE no emite eventos de cambio de proyecto: sondear al volver al panel acorta la espera
   // sin subir la cadencia de fondo. mouseenter y no pointerenter: CEP 11 en macOS no emite
