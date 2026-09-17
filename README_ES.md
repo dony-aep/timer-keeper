@@ -41,7 +41,17 @@ Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde ce
 
 ## Instalación
 
-### Para usuarios (extensión ya compilada)
+### Para usuarios: instalación rápida (recomendada)
+Cada [release](https://github.com/dony-aep/timer-keeper/releases/latest) incluye un `.zxp` firmado. No necesita modo debug ni claves de registro.
+
+1. Descarga e instala el [ZXP/UXP Installer de aescripts + aeplugins](https://aescripts.com/learn/zxp-installer/), gratuito, para Windows y macOS.
+2. Descarga `timer-keeper-vX.Y.Z.zxp` de la última release.
+3. Cierra After Effects y abre el `.zxp` en el instalador: arrástralo a la ventana o usa **File > Open**.
+4. Abre After Effects y ve a **Ventana > Extensiones > Timer Keeper**.
+
+> Si el instalador dice que no encontró ninguna aplicación compatible y marca After Effects con «Action required», es porque el instalador de Adobe necesita la app de escritorio de Creative Cloud abierta y con la sesión iniciada. Puedes instalar sin ella: pulsa **Install Anyway**. Si eso falla, abre los ajustes del instalador (icono del engranaje), activa **Install for current user only** e instala de nuevo.
+
+### Para usuarios: instalación manual (zip)
 1. Localiza la carpeta de extensiones CEP de After Effects:
    - **Windows:** `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions` (o, por usuario: `%APPDATA%\Adobe\CEP\extensions`)
    - **macOS:** `/Library/Application Support/Adobe/CEP/extensions` (o, por usuario: `~/Library/Application Support/Adobe/CEP/extensions`)
