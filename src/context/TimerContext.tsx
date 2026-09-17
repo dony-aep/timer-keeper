@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { HostSnapshot, StoreV2 } from '../types/data'
-import { dayKey, formatTime } from '../lib/time'
+import { creditableSeconds, dayKey, formatTime, MAX_TICK_GAP_MS } from '../lib/time'
 import {
   basename,
   creditTime,
@@ -234,20 +234,29 @@ export function TimerProvider({ children }: { children: ReactNode }) {
    * Credit elapsed wall-clock time to the active project using a monotonic delta from
    * the previous tick (never derived from an absolute start time -> no drift, no
    * negative jumps). The delta is credited to whatever local day the tick lands on.
+   * Gaps longer than MAX_TICK_GAP_MS (sleep, clock jumps) are not credited.
    */
   const tick = useCallback(() => {
     const path = currentPathRef.current
     const now = Date.now()
-    const delta = (now - lastTickRef.current) / 1000
+    const deltaMs = now - lastTickRef.current
     lastTickRef.current = now
-    if (!path || !(delta > 0)) return
-    const next = creditTime(storeRef.current, path, currentTitleRef.current, delta, dayKey())
+    if (path && deltaMs > MAX_TICK_GAP_MS) {
+      // Un hueco así solo ocurre si el PC se suspendió o el reloj saltó: no es trabajo.
+      notify(
+        `Not counted: ${Math.round(deltaMs / 60000)} min while the computer was asleep or the panel was frozen.`,
+        'info',
+      )
+    }
+    const seconds = creditableSeconds(deltaMs)
+    if (!path || !(seconds > 0)) return
+    const next = creditTime(storeRef.current, path, currentTitleRef.current, seconds, dayKey())
     commitStore(next)
     if (now - lastSaveRef.current >= SAVE_INTERVAL_MS) {
       lastSaveRef.current = now
       persist(next)
     }
-  }, [commitStore, persist])
+  }, [commitStore, persist, notify])
 
   const clearCurrent = useCallback(() => {
     currentPathRef.current = null

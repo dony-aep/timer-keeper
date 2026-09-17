@@ -14,6 +14,7 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 ### Corregido
 - **El archivo de datos podía perderse al fallar un guardado**: si reemplazar el archivo fallaba a mitad, podían borrarse tanto la copia antigua como la nueva. Ahora cada guardado conserva la versión anterior como `timerData.bak.json`, la restaura si algo falla y la carga la usa como respaldo.
 - **La detección de proyectos podía pararse toda la sesión**: si After Effects no respondía a una de las comprobaciones del panel, este dejaba de notar los cambios de proyecto hasta recargarlo. Ahora cada comprobación se abandona a los 60 segundos y se vuelve a intentar.
+- **La suspensión contaba como trabajo**: si el ordenador se suspendía con el timer en marcha, al despertar se sumaba al proyecto todo el tiempo suspendido. Ahora no se cuentan los huecos de más de 5 minutos entre actualizaciones del timer, y el panel avisa cuando descarta uno.
 
 ## [4.0.1] - 2026-09-10
 

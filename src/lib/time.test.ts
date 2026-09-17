@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { formatTime, parseFormattedTime, formatDescriptive, dayKey } from './time'
+import {
+  formatTime,
+  parseFormattedTime,
+  formatDescriptive,
+  dayKey,
+  creditableSeconds,
+  MAX_TICK_GAP_MS,
+} from './time'
 
 describe('formatTime', () => {
   it('formats zero', () => {
@@ -89,5 +96,43 @@ describe('dayKey', () => {
 
   it('zero-pads month and day', () => {
     expect(dayKey(new Date(2026, 6, 1))).toBe('2026-07-01')
+  })
+})
+
+describe('creditableSeconds', () => {
+  it('converts a normal tick to seconds', () => {
+    expect(creditableSeconds(1000)).toBe(1)
+    expect(creditableSeconds(1500)).toBe(1.5)
+  })
+
+  it('ignores zero and negative gaps', () => {
+    expect(creditableSeconds(0)).toBe(0)
+    expect(creditableSeconds(-2000)).toBe(0)
+  })
+
+  it('ignores non-finite gaps', () => {
+    expect(creditableSeconds(NaN)).toBe(0)
+    expect(creditableSeconds(Infinity)).toBe(0)
+  })
+
+  it('still counts the one-minute ticks of a hidden page', () => {
+    expect(creditableSeconds(60000)).toBe(60)
+  })
+
+  it('counts a gap exactly at the limit', () => {
+    expect(creditableSeconds(MAX_TICK_GAP_MS)).toBe(300)
+  })
+
+  it('drops a gap just over the limit', () => {
+    expect(creditableSeconds(MAX_TICK_GAP_MS + 1)).toBe(0)
+  })
+
+  it('drops a night of sleep', () => {
+    expect(creditableSeconds(8 * 60 * 60 * 1000)).toBe(0)
+  })
+
+  it('accepts a custom limit', () => {
+    expect(creditableSeconds(20000, 10000)).toBe(0)
+    expect(creditableSeconds(5000, 10000)).toBe(5)
   })
 })

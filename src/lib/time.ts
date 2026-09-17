@@ -78,3 +78,17 @@ export function dayKey(date: Date = new Date()): string {
   const d = pad2(date.getDate())
   return `${y}-${m}-${d}`
 }
+
+/**
+ * Mayor hueco entre dos ticks que todavía se cuenta. Desde Chromium 88 los temporizadores
+ * de una página oculta pueden revisarse solo una vez por minuto, así que huecos de ~60 s
+ * son trabajo normal; uno de más de 5 minutos indica suspensión o un salto del reloj.
+ */
+export const MAX_TICK_GAP_MS = 5 * 60 * 1000
+
+/** Segundos que se pueden sumar por un tick; 0 si el hueco es negativo, no finito o excesivo. */
+export function creditableSeconds(deltaMs: number, maxGapMs: number = MAX_TICK_GAP_MS): number {
+  if (!isFinite(deltaMs) || !(deltaMs > 0)) return 0
+  if (deltaMs > maxGapMs) return 0
+  return deltaMs / 1000
+}
