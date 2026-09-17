@@ -61,19 +61,17 @@
   display: inline-block;
   padding: 0 1px;
   opacity: 1;
+  transition: opacity var(--dur-3) var(--ease-out);
 }
 
-.colonLive {
-  animation: tk-colon-pulse 1.8s ease-in-out infinite;
+.colonDim {
+  opacity: 0.28;
 }
 
-@keyframes tk-colon-pulse {
-  0%,
-  100% {
+/* Sin movimiento: los dos puntos se quedan fijos en vez de parpadear sin transición. */
+@media (prefers-reduced-motion: reduce) {
+  .colonDim {
     opacity: 1;
-  }
-  50% {
-    opacity: 0.28;
   }
 }
 

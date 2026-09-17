@@ -12,8 +12,8 @@ import styles from './TimerTab.module.css'
 
 /**
  * HH:MM:SS split into standalone digit groups + colon spans so the colons
- * (and only the colons) can pulse while the timer runs. Descriptive format
- * has no fixed shape, so it renders as plain tabular text instead.
+ * (and only the colons) can dim every other second while the timer runs. Descriptive
+ * format has no fixed shape, so it renders as plain tabular text instead.
  */
 function TimeReadout({
   seconds,
@@ -29,7 +29,10 @@ function TimeReadout({
     return <span className={timeClass}>{formatDescriptive(seconds)}</span>
   }
   const [h, m, s] = formatTime(seconds).split(':')
-  const colonClass = running ? `${styles.colon} ${styles.colonLive}` : styles.colon
+  // Atenuados en los segundos impares: una transición por segundo en vez de una animación
+  // infinita que obliga a dibujar fotogramas sin parar mientras el timer cuenta.
+  const dim = running && seconds % 2 === 1
+  const colonClass = dim ? `${styles.colon} ${styles.colonDim}` : styles.colon
   return (
     <span className={timeClass}>
       {h}
