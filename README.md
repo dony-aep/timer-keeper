@@ -106,6 +106,7 @@ After `npm run deploy`, restart After Effects to load the updated panel.
 - **Automatic project detection:** pauses the previous project and auto-starts the newly opened one if it already has tracked time; preventive pause for unsaved or version-converting projects.
 - **Project list:** search by name, double-click to open a project (and start timing it), delete a project and its data, refresh from disk.
 - **Reset:** clear the accumulated time for the selected project (with confirmation).
+- **Auto-pause when idle:** optional, off by default. Pauses the timer after 5 to 30 minutes without keyboard or mouse activity, removes that idle time, and resumes when you are back on the same project.
 - **Time format toggle:** switch between `HH:MM:SS` and a descriptive duration format.
 - **Dashboard:** total time tracked, today's time (real, per calendar day), project count, and a donut or horizontal bar distribution with a Top 5 / All toggle. Each project can have its own color.
 - **Help modal:** usage guide, "Open Data Location" shortcut, and a contact/documentation link.
@@ -126,7 +127,7 @@ After `npm run deploy`, restart After Effects to load the updated panel.
    - Toggle between the **Top 5** and **All** projects in the distribution view.
    - Click a project's swatch in the donut legend to pick its color, or **Automatic** to go back to grey.
 5. **Help:** click the help icon in the footer for a usage guide, quick access to your data file's folder, and support/documentation links.
-6. **Flyout menu:** open the panel's menu (top-right) to refresh the project list or open the online documentation.
+6. **Flyout menu:** open the panel's menu (top-right) to refresh the project list, turn on **Auto-pause when idle**, or open the online documentation.
 
 ## Data
 Timer data is stored as JSON in `Documents/Adobe/TimerData/timerData.json`, written by the panel through a temp file, keeping the previous version as `timerData.bak.json`. Older formats from previous versions are detected and migrated automatically the first time you open the extension, with a backup copy written before the migration.

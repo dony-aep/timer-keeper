@@ -16,6 +16,7 @@ import {
   pendingTotal,
   mergeStores,
   setProjectColor,
+  removeTime,
 } from './store'
 
 describe('parseStore - v2 passthrough', () => {
@@ -383,6 +384,31 @@ describe('mergeStores', () => {
     expect(theirs.projects[0].color).toBe('#38bdf8')
     const cleared = mergeStores(setProjectColor(base, A, '#38bdf8'), base, setProjectColor(base, A, '#38bdf8'))
     expect(cleared.projects[0].color).toBeUndefined()
+  })
+})
+
+describe('removeTime', () => {
+  const A = 'C:\\p\\A.aep'
+  const seed: StoreV2 = {
+    version: 2,
+    projects: [{ path: A, title: 'A.aep', totalSeconds: 1000, daily: { '2026-09-23': 400, '2026-09-24': 600 } }],
+  }
+
+  it('subtracts per day and from the total', () => {
+    const s = removeTime(seed, A, { '2026-09-24': 120, '2026-09-23': 30 })
+    expect(s.projects[0].daily).toEqual({ '2026-09-23': 370, '2026-09-24': 480 })
+    expect(s.projects[0].totalSeconds).toBe(850)
+  })
+
+  it('never goes below zero and drops emptied days', () => {
+    const s = removeTime(seed, A, { '2026-09-24': 900, '2026-09-20': 50 })
+    expect(s.projects[0].daily).toEqual({ '2026-09-23': 400 })
+    expect(s.projects[0].totalSeconds).toBe(400)
+  })
+
+  it('returns the same store for an unknown project or nothing to remove', () => {
+    expect(removeTime(seed, 'C:\\p\\Z.aep', { '2026-09-24': 10 })).toBe(seed)
+    expect(removeTime(seed, A, {})).toBe(seed)
   })
 })
 
