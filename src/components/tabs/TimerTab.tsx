@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { ListBox, ListBoxItem } from 'react-aria-components'
 import { useTimer, useTimerClock } from '../../context/TimerContext'
 import { useToasts } from '../toast/ToastProvider'
@@ -7,7 +7,7 @@ import { Icon } from '../ui/Icon'
 import { SearchField } from '../ui/SearchField'
 import { ConfirmDialog, type ConfirmRequest } from '../ui/ConfirmDialog'
 import { basename } from '../../lib/store'
-import { formatTime, formatDescriptive } from '../../lib/time'
+import { formatTime, formatDescriptive, readoutScale } from '../../lib/time'
 import styles from './TimerTab.module.css'
 
 /**
@@ -39,13 +39,14 @@ function TimeReadout({
       </span>
     )
   }
-  const [h, m, s] = formatTime(seconds).split(':')
+  const text = formatTime(seconds)
+  const [h, m, s] = text.split(':')
   // Atenuados en los segundos impares: una transición por segundo en vez de una animación
   // infinita que obliga a dibujar fotogramas sin parar mientras el timer cuenta.
   const dim = running && seconds % 2 === 1
   const colonClass = dim ? `${styles.colon} ${styles.colonDim}` : styles.colon
   return (
-    <span className={timeClass}>
+    <span className={timeClass} style={{ '--fit': readoutScale(text) } as CSSProperties}>
       {h}
       <span className={colonClass}>:</span>
       {m}

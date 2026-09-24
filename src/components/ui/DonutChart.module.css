@@ -88,7 +88,8 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
   font-variation-settings: 'wght' 560;
-  font-size: clamp(12px, 3.4vw, 15px);
+  /* --fit: ver readoutScale(); con 10 000 h el texto tocaba el anillo. */
+  font-size: calc(clamp(12px, 3.4vw, 15px) * var(--fit, 1));
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--ink-hi);
