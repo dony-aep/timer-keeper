@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Text time format running off the panel**: long times such as "1 hrs, 7 mins, 44 secs" spilled past the edges of the timer card and under the format button. The text now wraps between units and fits even at the narrowest panel width.
+- **Dashboard lists hard to read on narrow panels**: when the summary cards stacked, the donut legend was squeezed to about one row, and the bar chart stretched the Dashboard with every tracked project. Both now show at least about five projects and scroll inside their own area.
 
 ## [4.1.0] - 2026-09-16
 
