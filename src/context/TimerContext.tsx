@@ -15,6 +15,7 @@ import {
   applyPending,
   basename,
   parseStore,
+  rebaseOnMerged,
   pendingTotal,
   projectTotal,
   removeProject as removeProjectFromStore,
@@ -271,9 +272,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
           if (backend.saveMerged) {
             const result = backend.saveMerged(next)
             ok = result.ok
-            // Muestra lo que añadió otra instancia de AE, salvo que el almacén ya haya
-            // cambiado: entonces el siguiente guardado vuelve a fusionar.
-            if (ok && result.merged && storeRef.current === next) commitStore(result.store)
+            // Adopta lo que añadió otra instancia de AE, también si el almacén cambió mientras
+            // se guardaba: el siguiente guardado ya no fusiona (ver rebaseOnMerged).
+            if (ok && result.merged) {
+              const rebased = rebaseOnMerged(next, storeRef.current, result.store)
+              commitStore(rebased)
+              if (pendingStoreRef.current !== null) pendingStoreRef.current = rebased
+            }
           } else {
             ok = await backend.save(serializeStore(next))
           }
@@ -795,7 +800,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       // no llegar a ejecutarse.
       const backend = backendRef.current
       if (backend?.saveMerged && cep.isCEP && canPersistRef.current) {
-        backend.saveMerged(saved)
+        // visibilitychange guarda justo después: sin adoptar lo fusionado, escribiría el
+        // almacén de antes encima.
+        const result = backend.saveMerged(saved)
+        if (result.ok && result.merged) commitStore(rebaseOnMerged(saved, storeRef.current, result.store))
         return
       }
       void persist(saved)
@@ -812,7 +820,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('beforeunload', flush)
       document.removeEventListener('visibilitychange', onHidden)
     }
-  }, [tick, flushPending, persist, cep])
+  }, [tick, flushPending, persist, cep, commitStore])
 
   const elapsedSeconds = currentProject
     ? Math.floor(projectTotal(store, currentProject.path) + liveSeconds)

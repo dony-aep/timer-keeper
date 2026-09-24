@@ -12,7 +12,7 @@ import {
   writeDataFile,
 } from './dataFile'
 import { FakeFs } from './testFakeFs'
-import { serializeStore } from './store'
+import { rebaseOnMerged, serializeStore } from './store'
 
 const dir = 'C:/data'
 const main = `${dir}/timerData.json`
@@ -220,6 +220,21 @@ describe('saveWithMerge', () => {
     fs.put(main, serializeStore(store(project(A, 130))))
     fs.failRead.add(main)
     expect(saveWithMerge(fs, dir, store(project(A, 160)), sync).ok).toBe(false)
+  })
+
+  it('keeps what another instance wrote across two saves in a row', () => {
+    // Al cerrar el panel se guarda dos veces seguidas (beforeunload y visibilitychange).
+    // La segunda ve el archivo tal como lo dejó la primera y no vuelve a fusionar, así que
+    // tiene que partir del resultado fusionado y no del almacén de antes.
+    const fs = fsWithDir()
+    const sync = loaded(fs)
+    fs.put(main, serializeStore(store(project(A, 130), project(B, 40))))
+    const ours = store(project(A, 160))
+    const first = saveWithMerge(fs, dir, ours, sync)
+    const current = rebaseOnMerged(ours, ours, first.store)
+    const second = saveWithMerge(fs, dir, current, first.sync)
+    expect(second.merged).toBe(false)
+    expect(JSON.parse(fs.text(main) as string)).toEqual(store(project(A, 190), project(B, 40)))
   })
 
   it('writes the first save when no file exists yet', () => {

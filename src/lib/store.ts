@@ -343,6 +343,16 @@ function mergeEntry(base: ProjectEntry | undefined, ours: ProjectEntry, disk: Pr
 }
 
 /**
+ * Lo que el panel debe tener en memoria tras un guardado que fusionó: `merged` más lo que
+ * cambió desde que se mandó `saved`. Hay que adoptarlo siempre: el siguiente guardado ve
+ * el archivo tal como lo dejó este y ya no fusiona, así que escribiría el almacén de antes
+ * y borraría lo que añadió la otra instancia.
+ */
+export function rebaseOnMerged(saved: StoreV2, current: StoreV2, merged: StoreV2): StoreV2 {
+  return current === saved ? merged : mergeStores(saved, current, merged)
+}
+
+/**
  * Fusión a tres bandas para dos instancias de After Effects que escriben el mismo archivo:
  * `base` es lo que había en disco cuando esta instancia cargó o guardó por última vez,
  * `ours` lo que tiene ahora y `disk` lo que otra instancia escribió después. Se suma lo que

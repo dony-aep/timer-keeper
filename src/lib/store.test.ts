@@ -17,6 +17,7 @@ import {
   mergeStores,
   setProjectColor,
   removeTime,
+  rebaseOnMerged,
 } from './store'
 
 describe('parseStore - v2 passthrough', () => {
@@ -384,6 +385,32 @@ describe('mergeStores', () => {
     expect(theirs.projects[0].color).toBe('#38bdf8')
     const cleared = mergeStores(setProjectColor(base, A, '#38bdf8'), base, setProjectColor(base, A, '#38bdf8'))
     expect(cleared.projects[0].color).toBeUndefined()
+  })
+})
+
+describe('rebaseOnMerged', () => {
+  const A = 'C:\\p\\A.aep'
+  const B = 'C:\\p\\B.aep'
+  const DAY = '2026-09-23'
+  const entry = (path: string, seconds: number) => ({
+    path,
+    title: basename(path),
+    totalSeconds: seconds,
+    daily: { [DAY]: seconds },
+  })
+  const store = (...projects: ReturnType<typeof entry>[]): StoreV2 => ({ version: 2, projects })
+
+  it('takes the merged store when nothing changed while saving', () => {
+    const saved = store(entry(A, 160))
+    const merged = store(entry(A, 190), entry(B, 40))
+    expect(rebaseOnMerged(saved, saved, merged)).toBe(merged)
+  })
+
+  it('keeps what changed while saving on top of the merged store', () => {
+    const saved = store(entry(A, 160))
+    const current = store(entry(A, 165))
+    const merged = store(entry(A, 190), entry(B, 40))
+    expect(rebaseOnMerged(saved, current, merged)).toEqual(store(entry(A, 195), entry(B, 40)))
   })
 })
 
