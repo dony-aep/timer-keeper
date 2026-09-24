@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { formatTime, formatPercent } from '../../lib/time'
+import { useMemo, useState, type CSSProperties } from 'react'
+import { formatTime, formatPercent, readoutScale } from '../../lib/time'
 import { SwatchPicker } from './SwatchPicker'
 import styles from './DonutChart.module.css'
 
@@ -39,6 +39,14 @@ function greyRamp(count: number): string[] {
     out.push(`rgb(${v},${v},${v})`)
   }
   return out
+}
+
+function CenterValue({ text }: { text: string }) {
+  return (
+    <span className={styles.centerValue} style={{ '--fit': readoutScale(text) } as CSSProperties}>
+      {text}
+    </span>
+  )
 }
 
 /**
@@ -117,12 +125,12 @@ export function DonutChart({ items, emptyLabel = 'No data yet.', onColorChange }
               <span className={styles.centerName} title={active.label}>
                 {active.label}
               </span>
-              <span className={styles.centerValue}>{formatTime(active.seconds)}</span>
+              <CenterValue text={formatTime(active.seconds)} />
               <span className={styles.centerLabel}>{formatPercent(active.fraction)}</span>
             </>
           ) : (
             <>
-              <span className={styles.centerValue}>{formatTime(total)}</span>
+              <CenterValue text={formatTime(total)} />
               <span className={styles.centerLabel}>shown</span>
             </>
           )}

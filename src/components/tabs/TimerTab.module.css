@@ -48,7 +48,8 @@
   font-variation-settings:
     'wght' 620,
     'wdth' 92;
-  font-size: clamp(27px, 10vw, 40px);
+  /* --fit lo pone readoutScale(): con miles de horas el texto se alarga y el panel no. */
+  font-size: calc(clamp(27px, 10vw, 40px) * var(--fit, 1));
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--ink-hi);

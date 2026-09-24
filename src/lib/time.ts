@@ -59,6 +59,16 @@ export function formatDescriptive(seconds: number): string {
 }
 
 /**
+ * Escala de letra para una lectura HH:MM:SS: con cientos o miles de horas el texto pasa de
+ * 8 a 10 u 11 caracteres y el panel no se ensancha. Los factores salen de medir el reloj en
+ * AE: en el panel más estrecho caben unos 140 px a 27 px de letra.
+ */
+export function readoutScale(text: string): number {
+  const extra = Math.max(0, text.length - 8)
+  return [1, 0.95, 0.85, 0.76][extra] ?? 0.68
+}
+
+/**
  * Format a 0..1 fraction as a rounded percentage ("34%"). Non-zero shares that
  * round to 0 are shown as "<1%" so tiny slices aren't misreported as nothing.
  */

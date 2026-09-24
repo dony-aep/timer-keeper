@@ -3,6 +3,7 @@ import {
   formatTime,
   parseFormattedTime,
   formatDescriptive,
+  readoutScale,
   dayKey,
   creditableSeconds,
   MAX_TICK_GAP_MS,
@@ -84,6 +85,21 @@ describe('formatDescriptive', () => {
   it('clamps invalid input to zero', () => {
     expect(formatDescriptive(-5)).toBe('0 mins, 0 secs')
     expect(formatDescriptive(NaN)).toBe('0 mins, 0 secs')
+  })
+})
+
+describe('readoutScale', () => {
+  it('keeps the size up to 99 hours and shrinks with each extra digit', () => {
+    expect(readoutScale(formatTime(99 * 3600))).toBe(1)
+    const sizes = [100, 1000, 10000, 100000].map((h) => readoutScale(formatTime(h * 3600)))
+    expect(sizes).toEqual([...sizes].sort((a, b) => b - a))
+    expect(sizes[0]).toBeLessThan(1)
+  })
+
+  it('fits 10 000 hours in the narrowest clock (140 px at 27 px type)', () => {
+    // Medido en AE: 11 caracteres ocupan 175 px a 27 px de letra.
+    expect(175 * readoutScale('10000:00:00')).toBeLessThanOrEqual(140)
+    expect(157 * readoutScale('1000:00:00')).toBeLessThanOrEqual(140)
   })
 })
 
