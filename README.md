@@ -24,27 +24,6 @@ Formerly distributed as "AE TimerKeeper", the extension has been rebuilt from th
 - **Longer notifications:** they stay at least 8 seconds and do not close while the pointer is over them.
 - **Fixed:** long times in the text format ("1 hrs, 7 mins, 44 secs") no longer spill past the timer card.
 
-## What's New in v4.1.0
-- **Lighter on After Effects:** the panel writes your time itself every 30 s instead of asking After Effects every 5 s, and checks the open project every 5 s while timing (10 s while paused) instead of every 2 s.
-- **Safer data:** every save keeps the previous version as `timerData.bak.json` and falls back to it if the main file goes missing or corrupt.
-- **Sleep no longer counts as work:** gaps longer than 5 minutes are skipped, with a notice.
-- **Two After Effects windows** tracking at once no longer overwrite each other's time.
-- **Much smaller download:** the icon font now ships only the icons the panel uses (about 7 KB instead of 4 MB).
-
-## What's New in v4.0.1
-- **Panel loads on macOS:** on After Effects 2022 the panel no longer opens empty.
-- **Clicks work on macOS:** buttons, tabs and the project list now respond on After Effects 2022.
-
-## What's New in v4.0.0
-- **Rebuilt from the ground up** on a modular React + TypeScript codebase (bundled with Vite), replacing the previous single-file panel — easier to maintain and extend.
-- **Rebranded**: "AE TimerKeeper" is now **Timer Keeper**, with a new extension ID and panel name.
-- **Monochrome "instrument" UI**: no color accents — state is shown through icon, luminance, and subtle motion (a pulsing colon while the timer runs, an animating Start/Pause key).
-- **Real "Today" tracking**: the Dashboard's daily total now reflects actual time logged today (previously a hardcoded placeholder), backed by a new per-day data schema.
-- **Dashboard redesigned**: the colored donut chart was replaced with a monochrome horizontal bar distribution, plus stat cards and a Top 5 / All toggle.
-- **Bug fixes carried over from v3**: the time-format toggle no longer crashes, the flyout menu no longer runs actions twice, toast notifications no longer double-fire or use the wrong style, and the host/panel time formatting is unified into a single implementation.
-- **Fully offline**: fonts (Google Sans Flex) and icons (Material Symbols) are bundled locally — no CDN requests.
-- **Updated compatibility:** now targets After Effects 2022 (22.0) and newer.
-
 ## Installation
 
 ### For users: quick install (recommended)
