@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Auto-pause when idle**: if you leave the computer with the timer running, it can now pause itself after 5, 10, 15 or 30 minutes without keyboard or mouse activity, remove that idle time from the project, and resume when you come back to the same project. Choose the delay in the panel menu under **Auto-pause when idle**; it is off by default. A manual pause never resumes on its own.
 - **Project colors**: in the Dashboard, click a project's swatch in the donut legend to give it a color, from ten presets or any color with the picker (color area, hue slider and hex field). The color shows in the donut and bar charts and is saved with your data; **Automatic** goes back to the default grey.
 
+### Changed
+- **Notifications stay longer**: they now stay on screen at least 8 seconds (up to 20 for long messages) and do not close while the pointer is over them. Moving the pointer away starts the countdown again, and the X closes them right away.
+
 ### Fixed
 - **Text time format running off the panel**: long times such as "1 hrs, 7 mins, 44 secs" spilled past the edges of the timer card and under the format button. The text now wraps between units and fits even at the narrowest panel width.
 

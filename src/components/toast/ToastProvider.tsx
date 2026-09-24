@@ -17,11 +17,10 @@ const EXIT_MS = 220
 const MAX_VISIBLE = 4
 
 /* Auto-dismiss: scaled to reading time instead of a flat delay. */
-const MIN_DISMISS_MS = 5000
-const MAX_DISMISS_MS = 12000
-const MS_PER_CHAR = 45 // ~comfortable reading pace
+const MIN_DISMISS_MS = 8000
+const MAX_DISMISS_MS = 20000
+const MS_PER_CHAR = 70 // unhurried reading pace, with time to reach the toast
 const SEVERITY_FACTOR = 1.3 // warnings/errors linger a little longer
-const RESUME_GRACE_MS = 2000 // time left after the pointer leaves a hovered toast
 
 function autoDismissDelay(message: string, kind: NoticeKind): number {
   const base = Math.min(Math.max(MIN_DISMISS_MS, message.length * MS_PER_CHAR), MAX_DISMISS_MS)
@@ -125,13 +124,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  /** Pointer left: give a short grace period, then dismiss. */
+  /** Pointer left: the countdown starts over from the full delay. */
   const resume = useCallback(
-    (id: number) => {
-      if (timersRef.current.has(id)) return // never held (e.g. already leaving)
+    (toast: ToastItem) => {
+      if (toast.leaving || timersRef.current.has(toast.id)) return
       timersRef.current.set(
-        id,
-        window.setTimeout(() => dismiss(id), RESUME_GRACE_MS),
+        toast.id,
+        window.setTimeout(() => dismiss(toast.id), autoDismissDelay(toast.message, toast.kind)),
       )
     },
     [dismiss],
@@ -160,7 +159,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               toast.leaving ? styles.leaving : '',
             ].join(' ')}
             onMouseEnter={() => hold(toast.id)}
-            onMouseLeave={() => resume(toast.id)}
+            onMouseLeave={() => resume(toast)}
           >
             <Icon
               name={KIND_ICON[toast.kind]}
