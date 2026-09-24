@@ -24,10 +24,10 @@
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  /* Floor, not 0: room for the donut ring (128px min) plus a few legend rows.
-     Below this the section overflows the tab, whose own overflow-y takes over,
-     instead of squashing the chart on short panels. */
-  min-height: 240px;
+  /* Floor, not 0: header + donut ring (128px min) + the legend's ~5-row floor, which
+     also covers the bar list's. Below this the tab's own overflow-y takes over instead
+     of squashing the chart; above it the lists grow and scroll inside. */
+  min-height: 320px;
 }
 
 .distributionHeader {

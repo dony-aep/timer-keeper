@@ -13,10 +13,16 @@
   border-radius: var(--radius-2);
 }
 
+/* Same rule as the donut legend: fills the section, never shorter than about five rows,
+   and scrolls inside instead of stretching the tab with every tracked project. */
 .list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  min-height: 170px;
+  overflow-y: auto;
+  padding-right: 2px;
   list-style: none;
 }
 

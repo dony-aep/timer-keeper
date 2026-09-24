@@ -103,9 +103,13 @@
 
 /* ---------- Legend (keyboard-navigable, accessible list) ---------- */
 
+/* Floor of about five rows with its own scroll: on narrow panels, where the summary
+   cards stack, the ring used to leave it barely one row. The Dashboard's distribution
+   floor leaves room for ring + this floor. */
 .legend {
   width: 100%;
-  min-height: 0;
+  flex: 1;
+  min-height: 130px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
