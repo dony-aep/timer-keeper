@@ -18,6 +18,7 @@ function setup() {
   const record = (e: Event) => seen.push(e as unknown as Record<string, unknown>)
   win.addEventListener('pointerdown', record)
   win.addEventListener('pointerup', record)
+  win.addEventListener('pointermove', record)
   const mouse = (type: string, props: Record<string, number>) =>
     win.dispatchEvent(Object.assign(new Event(type), props))
   return { seen, mouse }
@@ -45,6 +46,15 @@ describe('installPointerEventFallback', () => {
     mouse('mouseup', { clientX: 5, clientY: 6, button: 0, buttons: 0, detail: 1 })
     expect(seen).toHaveLength(1)
     expect(seen[0]).toMatchObject({ type: 'pointerup', pressure: 0 })
+  })
+
+  it('re-emits pointermove so drags (color area, sliders) follow the mouse', () => {
+    const { seen, mouse } = setup()
+    mouse('mousemove', { clientX: 40, clientY: 50, button: 0, buttons: 1, detail: 0 })
+    mouse('mousemove', { clientX: 41, clientY: 50, button: 0, buttons: 0, detail: 0 })
+    expect(seen).toHaveLength(2)
+    expect(seen[0]).toMatchObject({ type: 'pointermove', clientX: 40, clientY: 50, buttons: 1, pressure: 0.5 })
+    expect(seen[1]).toMatchObject({ type: 'pointermove', buttons: 0, pressure: 0 })
   })
 
   it('keeps re-emitting after its own untrusted pointer events', () => {

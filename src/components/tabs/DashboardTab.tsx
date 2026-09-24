@@ -25,7 +25,7 @@ function LiveTotals({ total, today }: { total: number; today: number }) {
 }
 
 export function DashboardTab() {
-  const { store } = useTimer()
+  const { store, setProjectColor } = useTimer()
   const [showAll, setShowAll] = useState(false)
   const [chartType, setChartType] = useState<ChartType>('donut')
 
@@ -39,6 +39,12 @@ export function DashboardTab() {
   )
   const visible = showAll ? ranked : ranked.slice(0, TOP_COUNT)
   const hiddenCount = Math.max(ranked.length - TOP_COUNT, 0)
+  const items = visible.map((p) => ({
+    id: p.path,
+    label: p.title,
+    seconds: p.totalSeconds,
+    color: p.color,
+  }))
 
   return (
     <div className={styles.tab}>
@@ -93,12 +99,13 @@ export function DashboardTab() {
 
         {chartType === 'donut' ? (
           <DonutChart
-            items={visible.map((p) => ({ id: p.path, label: p.title, seconds: p.totalSeconds }))}
+            items={items}
             emptyLabel="No projects tracked yet."
+            onColorChange={setProjectColor}
           />
         ) : (
           <BarList
-            items={visible.map((p) => ({ id: p.path, label: p.title, seconds: p.totalSeconds }))}
+            items={items}
             emptyLabel="No projects tracked yet."
           />
         )}

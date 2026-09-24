@@ -7,6 +7,9 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 
 ## [Unreleased]
 
+### Añadido
+- **Colores por proyecto**: en el Dashboard, haz clic en el cuadradito de un proyecto en la leyenda de la dona para darle un color, entre diez predefinidos o cualquiera con el selector (área de color, barra de tono y campo hex). El color se ve en la dona y en las barras y se guarda con tus datos; **Automatic** vuelve al gris por defecto.
+
 ### Corregido
 - **El formato de texto se salía del panel**: los tiempos largos como «1 hrs, 7 mins, 44 secs» se salían de la tarjeta del timer y quedaban debajo del botón de formato. Ahora el texto baja de línea entre unidades y cabe incluso con el panel en su ancho mínimo.
 

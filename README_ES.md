@@ -107,7 +107,7 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
 - **Lista de proyectos:** búsqueda por nombre, doble clic para abrir un proyecto (e iniciar su cronometraje), eliminar un proyecto y sus datos, actualizar desde disco.
 - **Reiniciar:** borra el tiempo acumulado del proyecto seleccionado (con confirmación).
 - **Alternador de formato de tiempo:** cambia entre `HH:MM:SS` y un formato de duración descriptivo.
-- **Dashboard:** tiempo total registrado, tiempo de hoy (real, por día calendario), número de proyectos, y una distribución de barras horizontales monocromáticas con alternador Top 5 / Todos.
+- **Dashboard:** tiempo total registrado, tiempo de hoy (real, por día calendario), número de proyectos, y una distribución en dona o en barras horizontales con alternador Top 5 / Todos. Cada proyecto puede tener su propio color.
 - **Modal de ayuda:** guía de uso, atajo "Abrir Ubicación de Datos", y enlace de contacto/documentación.
 - **Notificaciones toast** para advertencias (p. ej. "pausa antes de reiniciar") y confirmaciones.
 - **Notificaciones de actualización:** consulta GitHub Releases (como máximo una vez al día) y muestra un enlace en el footer cuando hay una versión más nueva; el chequeo manual "Check for Updates" vive en el menú flyout. Totalmente silencioso sin conexión.
@@ -124,6 +124,7 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
 4. **Pestaña Dashboard:**
    - Revisa el tiempo total registrado, el tiempo de hoy, y el número de proyectos rastreados.
    - Alterna entre **Top 5** y **Todos** los proyectos en la vista de distribución.
+   - Haz clic en el cuadradito de un proyecto en la leyenda de la dona para elegir su color, o en **Automatic** para volver al gris.
 5. **Ayuda:** haz clic en el icono de ayuda en el pie para ver una guía de uso, acceso rápido a la carpeta de tu archivo de datos, y enlaces de soporte/documentación.
 6. **Menú flyout:** abre el menú del panel (arriba a la derecha) para actualizar la lista de proyectos o abrir la documentación en línea.
 

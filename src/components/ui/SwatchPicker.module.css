@@ -1,0 +1,197 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  margin: -4px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color var(--dur-1) var(--ease-out);
+}
+
+.trigger[data-hovered],
+.trigger[data-pressed] {
+  border-color: var(--line-strong);
+}
+
+.trigger[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+.popover {
+  z-index: 100;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-drop);
+}
+
+.popover[data-entering] {
+  animation: tk-fade var(--dur-2) var(--ease-out);
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  outline: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 22px);
+  gap: 6px;
+}
+
+.option {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-1);
+  cursor: pointer;
+  transition: transform var(--dur-1) var(--ease-out);
+}
+
+.option[data-hovered] {
+  transform: scale(1.1);
+}
+
+.option[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.optionSelected {
+  border-color: var(--ink-max);
+}
+
+/* ---------- Free picker ---------- */
+
+.custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.area {
+  width: 134px;
+  height: 96px;
+  border-radius: var(--radius-1);
+}
+
+.thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.6);
+  box-sizing: border-box;
+}
+
+.thumb[data-focus-visible] {
+  width: 18px;
+  height: 18px;
+}
+
+.hue {
+  width: 134px;
+}
+
+.hueTrack {
+  height: 12px;
+  border-radius: 6px;
+}
+
+.hueThumb {
+  top: 50%;
+}
+
+.customRow {
+  display: flex;
+  gap: 6px;
+  width: 134px;
+}
+
+.hexField {
+  flex: 1;
+  min-width: 0;
+}
+
+.hexInput {
+  width: 100%;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-hi);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-1);
+  outline: none;
+}
+
+.hexInput[data-focused] {
+  border-color: var(--line-strong);
+}
+
+.hexInput[data-invalid] {
+  border-color: #f87171;
+}
+
+.apply {
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--key-ink);
+  background: var(--key-bg);
+  border: 1px solid var(--key-bg);
+  border-radius: var(--radius-1);
+  cursor: pointer;
+}
+
+.apply[data-hovered] {
+  background: var(--key-bg-hover);
+}
+
+.apply[data-focus-visible] {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.reset {
+  padding: 5px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 540;
+  color: var(--ink-mid);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-1);
+  cursor: pointer;
+}
+
+.reset[data-hovered] {
+  background: var(--veil-hover);
+  color: var(--ink-hi);
+}
+
+.reset[data-disabled] {
+  opacity: 0.4;
+  cursor: default;
+}

@@ -5,6 +5,7 @@ export interface BarListItem {
   id: string
   label: string
   seconds: number
+  color?: string
 }
 
 interface BarListProps {
@@ -46,7 +47,10 @@ export function BarList({ items, emptyLabel = 'No data yet.' }: BarListProps) {
               </span>
             </div>
             <div className={styles.track} aria-hidden="true">
-              <div className={styles.fill} style={{ width: `${fraction * 100}%` }} />
+              <div
+                className={styles.fill}
+                style={{ width: `${fraction * 100}%`, background: item.color }}
+              />
             </div>
           </li>
         )
