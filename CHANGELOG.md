@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Project colors**: in the Dashboard, click a project's swatch in the donut legend to give it a color, from ten presets or any color with the picker (color area, hue slider and hex field). The color shows in the donut and bar charts and is saved with your data; **Automatic** goes back to the default grey.
+
 ### Fixed
 - **Text time format running off the panel**: long times such as "1 hrs, 7 mins, 44 secs" spilled past the edges of the timer card and under the format button. The text now wraps between units and fits even at the narrowest panel width.
 

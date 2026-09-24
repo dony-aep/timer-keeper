@@ -58,6 +58,12 @@ function sanitizeDaily(raw: unknown): Record<string, number> {
   return out
 }
 
+// El color termina en un atributo style: solo se acepta hex para que el archivo no pueda
+// inyectar otra cosa.
+function isHexColor(value: unknown): value is string {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
+}
+
 /** Pass a v2 projects array through, sanitizing each entry. */
 function sanitizeV2(projectsRaw: unknown[]): StoreV2 {
   const projects: ProjectEntry[] = []
@@ -67,12 +73,14 @@ function sanitizeV2(projectsRaw: unknown[]): StoreV2 {
     if (typeof p.path !== 'string' || p.path.trim() === '') continue
     const path = p.path
     const title = typeof p.title === 'string' && p.title.trim() !== '' ? p.title : basename(path)
-    projects.push({
+    const entry: ProjectEntry = {
       path,
       title,
       totalSeconds: toNonNegNumber(p.totalSeconds),
       daily: sanitizeDaily(p.daily),
-    })
+    }
+    if (isHexColor(p.color)) entry.color = p.color.toLowerCase()
+    projects.push(entry)
   }
   return { version: 2, projects }
 }
@@ -223,6 +231,16 @@ export function resetProject(store: StoreV2, path: string): StoreV2 {
   return { version: 2, projects }
 }
 
+/** Set a project's color ("#rrggbb"), or clear it with null. Invalid colors are ignored. */
+export function setProjectColor(store: StoreV2, path: string, color: string | null): StoreV2 {
+  const idx = store.projects.findIndex((p) => p.path === path)
+  if (idx < 0 || (color !== null && !isHexColor(color))) return store
+  const { color: _previous, ...rest } = store.projects[idx]
+  const projects = store.projects.slice()
+  projects[idx] = color === null ? rest : { ...rest, color: color.toLowerCase() }
+  return { version: 2, projects }
+}
+
 /** Remove a project entirely. */
 export function removeProject(store: StoreV2, path: string): StoreV2 {
   const projects = store.projects.filter((p) => p.path !== path)
@@ -288,12 +306,15 @@ function mergeEntry(base: ProjectEntry | undefined, ours: ProjectEntry, disk: Pr
     const seconds = roundMs((disk.daily[day] ?? 0) + (ours.daily[day] ?? 0) - (base?.daily[day] ?? 0))
     if (seconds > 0) daily[day] = seconds
   }
-  return {
+  const merged: ProjectEntry = {
     path: disk.path,
     title: base && ours.title !== base.title ? ours.title : disk.title,
     totalSeconds: Math.max(0, roundMs(disk.totalSeconds + ours.totalSeconds - (base?.totalSeconds ?? 0))),
     daily,
   }
+  const color = base && ours.color !== base.color ? ours.color : disk.color
+  if (color) merged.color = color
+  return merged
 }
 
 /**

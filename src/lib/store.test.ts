@@ -15,6 +15,7 @@ import {
   applyPending,
   pendingTotal,
   mergeStores,
+  setProjectColor,
 } from './store'
 
 describe('parseStore - v2 passthrough', () => {
@@ -373,5 +374,57 @@ describe('mergeStores', () => {
     const snapshot = JSON.stringify([base, ours, disk])
     mergeStores(base, ours, disk)
     expect(JSON.stringify([base, ours, disk])).toBe(snapshot)
+  })
+
+  it('keeps our color change and otherwise the disk color', () => {
+    const ours = mergeStores(base, setProjectColor(base, A, '#f87171'), store(entry(A, 130)))
+    expect(ours.projects[0]).toEqual({ ...entry(A, 130), color: '#f87171' })
+    const theirs = mergeStores(base, base, setProjectColor(base, A, '#38bdf8'))
+    expect(theirs.projects[0].color).toBe('#38bdf8')
+    const cleared = mergeStores(setProjectColor(base, A, '#38bdf8'), base, setProjectColor(base, A, '#38bdf8'))
+    expect(cleared.projects[0].color).toBeUndefined()
+  })
+})
+
+describe('project colors', () => {
+  const A = 'C:\\p\\A.aep'
+  const seed: StoreV2 = {
+    version: 2,
+    projects: [{ path: A, title: 'A.aep', totalSeconds: 100, daily: { '2026-07-01': 100 } }],
+  }
+
+  it('setProjectColor stores a lowercase hex color without mutating the input', () => {
+    const s = setProjectColor(seed, A, '#F87171')
+    expect(s.projects[0].color).toBe('#f87171')
+    expect(seed.projects[0].color).toBeUndefined()
+  })
+
+  it('setProjectColor with null goes back to the automatic color', () => {
+    const s = setProjectColor(setProjectColor(seed, A, '#f87171'), A, null)
+    expect('color' in s.projects[0]).toBe(false)
+  })
+
+  it('setProjectColor ignores unknown paths and invalid colors', () => {
+    expect(setProjectColor(seed, 'C:\\p\\Z.aep', '#f87171')).toBe(seed)
+    expect(setProjectColor(seed, A, 'red')).toBe(seed)
+  })
+
+  it('tracking and resetting time keep the color', () => {
+    const colored = setProjectColor(seed, A, '#f87171')
+    expect(creditTime(colored, A, 'A.aep', 5, '2026-07-01').projects[0].color).toBe('#f87171')
+    expect(resetProject(colored, A).projects[0].color).toBe('#f87171')
+  })
+
+  it('parseStore keeps valid colors and drops invalid ones', () => {
+    const raw = JSON.stringify({
+      version: 2,
+      projects: [
+        { path: A, title: 'A.aep', totalSeconds: 1, daily: {}, color: '#38BDF8' },
+        { path: 'C:\\p\\B.aep', title: 'B.aep', totalSeconds: 1, daily: {}, color: 'javascript:alert(1)' },
+      ],
+    })
+    const { store } = parseStore(raw)
+    expect(store.projects[0].color).toBe('#38bdf8')
+    expect('color' in store.projects[1]).toBe(false)
   })
 })

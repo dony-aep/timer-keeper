@@ -1,17 +1,22 @@
 import { useMemo, useState } from 'react'
 import { formatTime, formatPercent } from '../../lib/time'
+import { SwatchPicker } from './SwatchPicker'
 import styles from './DonutChart.module.css'
 
 export interface DonutChartItem {
   id: string
   label: string
   seconds: number
+  /** Color picked by the user; without one the slice takes its grey from the ramp. */
+  color?: string
 }
 
 interface DonutChartProps {
   items: DonutChartItem[]
   /** Empty-state copy, shown when there's nothing to plot. */
   emptyLabel?: string
+  /** Makes the legend swatches open a color picker. */
+  onColorChange?: (id: string, color: string | null) => void
 }
 
 /** r chosen so the circumference is exactly 100 — segment lengths == percentages. */
@@ -42,7 +47,7 @@ function greyRamp(count: number): string[] {
  * legend row) surfaces that project's readout in the ring's hole; the legend is
  * the keyboard-navigable, screen-reader accessible representation.
  */
-export function DonutChart({ items, emptyLabel = 'No data yet.' }: DonutChartProps) {
+export function DonutChart({ items, emptyLabel = 'No data yet.', onColorChange }: DonutChartProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const total = items.reduce((sum, i) => sum + i.seconds, 0)
@@ -59,7 +64,7 @@ export function DonutChart({ items, emptyLabel = 'No data yet.' }: DonutChartPro
       const drawLen = Math.max(len - gap, 0.4)
       return {
         ...item,
-        color: ramp[i],
+        color: item.color ?? ramp[i],
         fraction,
         dashArray: `${drawLen} ${100 - drawLen}`,
         dashOffset: 25 - start, // 25 = start drawing from 12 o'clock, clockwise
@@ -139,7 +144,16 @@ export function DonutChart({ items, emptyLabel = 'No data yet.' }: DonutChartPro
               onFocus={() => setActiveId(seg.id)}
               onBlur={() => setActiveId((cur) => (cur === seg.id ? null : cur))}
             >
-              <span className={styles.swatch} style={{ background: seg.color }} aria-hidden="true" />
+              {onColorChange ? (
+                <SwatchPicker
+                  label={seg.label}
+                  color={seg.color}
+                  customColor={items[i].color}
+                  onChange={(color) => onColorChange(seg.id, color)}
+                />
+              ) : (
+                <span className={styles.swatch} style={{ background: seg.color }} aria-hidden="true" />
+              )}
               <span className={styles.name} aria-hidden="true" title={seg.label}>
                 {seg.label}
               </span>

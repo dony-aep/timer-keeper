@@ -107,7 +107,7 @@ After `npm run deploy`, restart After Effects to load the updated panel.
 - **Project list:** search by name, double-click to open a project (and start timing it), delete a project and its data, refresh from disk.
 - **Reset:** clear the accumulated time for the selected project (with confirmation).
 - **Time format toggle:** switch between `HH:MM:SS` and a descriptive duration format.
-- **Dashboard:** total time tracked, today's time (real, per calendar day), project count, and a monochrome horizontal bar distribution with a Top 5 / All toggle.
+- **Dashboard:** total time tracked, today's time (real, per calendar day), project count, and a donut or horizontal bar distribution with a Top 5 / All toggle. Each project can have its own color.
 - **Help modal:** usage guide, "Open Data Location" shortcut, and a contact/documentation link.
 - **Toast notifications** for warnings (e.g. "pause before resetting") and confirmations.
 - **Update notifications:** checks GitHub Releases (at most once a day) and shows a footer link when a newer version is available; a manual "Check for Updates" lives in the flyout menu. Fully silent offline.
@@ -124,6 +124,7 @@ After `npm run deploy`, restart After Effects to load the updated panel.
 4. **Dashboard tab:**
    - Review total time tracked, today's time, and the number of tracked projects.
    - Toggle between the **Top 5** and **All** projects in the distribution view.
+   - Click a project's swatch in the donut legend to pick its color, or **Automatic** to go back to grey.
 5. **Help:** click the help icon in the footer for a usage guide, quick access to your data file's folder, and support/documentation links.
 6. **Flyout menu:** open the panel's menu (top-right) to refresh the project list or open the online documentation.
 

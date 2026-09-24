@@ -16,6 +16,11 @@ export interface ProjectEntry {
   totalSeconds: number
   /** Per-day accumulated seconds, keyed by local "YYYY-MM-DD". */
   daily: Record<string, number>
+  /**
+   * Color picked in the Dashboard, lowercase "#rrggbb". Absent means the automatic grey.
+   * Optional, so older files load unchanged and the store stays at version 2.
+   */
+  color?: string
 }
 
 /** The current on-disk store format. */

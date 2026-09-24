@@ -19,6 +19,7 @@ import {
   projectTotal,
   removeProject as removeProjectFromStore,
   resetProject as resetProjectFromStore,
+  setProjectColor as setProjectColorInStore,
   sanitizePath,
   serializeStore,
   upsertProject,
@@ -78,6 +79,8 @@ export interface TimerContextValue {
   pause: () => void
   resetProject: (path: string) => void
   removeProject: (path: string) => void
+  /** Color "#rrggbb" for the Dashboard; null goes back to the automatic grey. */
+  setProjectColor: (path: string, color: string | null) => void
   refresh: () => Promise<void>
   openProject: (path: string) => Promise<OpenProjectResult>
   toggleTimeFormat: () => void
@@ -518,6 +521,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     [doPause, commitStore, clearCurrent, persist, notify],
   )
 
+  const setProjectColor = useCallback(
+    (path: string, color: string | null) => {
+      const next = setProjectColorInStore(storeRef.current, path, color)
+      if (next === storeRef.current) return
+      commitStore(next)
+      persist(next)
+    },
+    [commitStore, persist],
+  )
+
   const refresh = useCallback(async () => {
     if (runningRef.current) doPause(false)
     clearCurrent()
@@ -684,6 +697,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       pause,
       resetProject,
       removeProject,
+      setProjectColor,
       refresh,
       openProject,
       toggleTimeFormat,
@@ -701,6 +715,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       pause,
       resetProject,
       removeProject,
+      setProjectColor,
       refresh,
       openProject,
       toggleTimeFormat,
