@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
-[![Version](https://img.shields.io/badge/version-4.1.0-white.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.2.0-white.svg)](CHANGELOG.md)
 [![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibility)
 [![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibility)
 [![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#tech-stack)
@@ -16,7 +16,13 @@ Timer Keeper is an Adobe After Effects extension that tracks the time you spend 
 Formerly distributed as "AE TimerKeeper", the extension has been rebuilt from the ground up as **Timer Keeper**.
 
 ## Current Version
-**v4.1.0** - Lighter on After Effects: saving and checking the open project ask far less of it, sleep no longer counts as work, and the download is much smaller. See [CHANGELOG.md](CHANGELOG.md).
+**v4.2.0** - The timer can pause itself when you step away, projects can have their own colors in the Dashboard, and long times in text format no longer run off the panel. See [CHANGELOG.md](CHANGELOG.md).
+
+## What's New in v4.2.0
+- **Auto-pause when idle:** optional, off by default. After 5 to 30 minutes without keyboard or mouse activity the timer pauses, that idle time is not counted, and it resumes when you come back to the same project. Turn it on in the panel menu. After updating, restart After Effects once so the panel can read system activity.
+- **Project colors:** click a project's swatch in the Dashboard legend to pick one of ten colors or any color with the picker.
+- **Longer notifications:** they stay at least 8 seconds and do not close while the pointer is over them.
+- **Fixed:** long times in the text format ("1 hrs, 7 mins, 44 secs") no longer spill past the timer card.
 
 ## What's New in v4.1.0
 - **Lighter on After Effects:** the panel writes your time itself every 30 s instead of asking After Effects every 5 s, and checks the open project every 5 s while timing (10 s while paused) instead of every 2 s.

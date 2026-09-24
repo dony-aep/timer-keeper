@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
-[![Versión](https://img.shields.io/badge/versión-4.1.0-white.svg)](CHANGELOG_ES.md)
+[![Versión](https://img.shields.io/badge/versión-4.2.0-white.svg)](CHANGELOG_ES.md)
 [![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibilidad)
 [![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibilidad)
 [![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#stack-tecnológico)
@@ -16,7 +16,13 @@ Timer Keeper es una extensión para Adobe After Effects que rastrea el tiempo qu
 Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde cero como **Timer Keeper**.
 
 ## Versión Actual
-**v4.1.0** - Más ligera para After Effects: guardar y comprobar el proyecto abierto le piden mucho menos trabajo, la suspensión ya no cuenta como tiempo trabajado y la descarga pesa mucho menos. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+**v4.2.0** - El timer puede pausarse solo cuando te alejas, los proyectos pueden tener su propio color en el Dashboard y los tiempos largos en formato de texto ya no se salen del panel. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+
+## Novedades en v4.2.0
+- **Pausa automática por inactividad:** opcional y desactivada por defecto. Tras 5 a 30 minutos sin teclado ni ratón, el timer se pausa, ese tiempo no se cuenta y se reanuda cuando vuelves al mismo proyecto. Se activa en el menú del panel. Después de actualizar, reinicia After Effects una vez para que el panel pueda leer la actividad del sistema.
+- **Colores por proyecto:** haz clic en el cuadradito de un proyecto en la leyenda del Dashboard para elegir uno de diez colores o cualquier color con el selector.
+- **Notificaciones más largas:** duran al menos 8 segundos y no se cierran mientras el cursor está encima.
+- **Corregido:** los tiempos largos en formato de texto («1 hrs, 7 mins, 44 secs») ya no se salen de la tarjeta del timer.
 
 ## Novedades en v4.1.0
 - **Más ligera para After Effects:** el panel escribe tu tiempo por sí mismo cada 30 s en vez de pedírselo a After Effects cada 5 s, y comprueba el proyecto abierto cada 5 s mientras cuenta (10 s en pausa) en vez de cada 2 s.

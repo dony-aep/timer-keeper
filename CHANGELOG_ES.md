@@ -5,7 +5,7 @@ Todos los cambios notables de Timer Keeper se documentan en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.2.0] - 2026-09-23
 
 ### Añadido
 - **Pausa automática por inactividad**: si te alejas del ordenador con el timer en marcha, ahora puede pausarse solo tras 5, 10, 15 o 30 minutos sin teclado ni ratón, descontar ese tiempo del proyecto y reanudarse cuando vuelves al mismo proyecto. El plazo se elige en el menú del panel, en **Auto-pause when idle**; viene desactivada. Una pausa manual nunca se reanuda sola.
