@@ -5,6 +5,11 @@ Todos los cambios notables de Timer Keeper se documentan en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Corregido
+- **El formato de texto se salía del panel**: los tiempos largos como «1 hrs, 7 mins, 44 secs» se salían de la tarjeta del timer y quedaban debajo del botón de formato. Ahora el texto baja de línea entre unidades y cabe incluso con el panel en su ancho mínimo.
+
 ## [4.1.0] - 2026-09-16
 
 ### Cambiado

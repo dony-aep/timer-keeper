@@ -32,6 +32,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  /* Reserva a ambos lados el ancho del botón de formato: la lectura no pasa por debajo
+     de él y sigue centrada. */
+  padding-inline: 34px;
 }
 
 .readoutRow > button {
@@ -55,6 +58,22 @@
 
 .timeLive {
   color: var(--ink-max);
+}
+
+.timeDescriptive {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.28em;
+  row-gap: 4px;
+  min-width: 0;
+  font-size: clamp(22px, 7.5vw, 32px);
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.unit {
+  white-space: nowrap;
 }
 
 .colon {
