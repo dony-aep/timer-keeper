@@ -24,27 +24,6 @@ Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde ce
 - **Notificaciones más largas:** duran al menos 8 segundos y no se cierran mientras el cursor está encima.
 - **Corregido:** los tiempos largos en formato de texto («1 hrs, 7 mins, 44 secs») ya no se salen de la tarjeta del timer.
 
-## Novedades en v4.1.0
-- **Más ligera para After Effects:** el panel escribe tu tiempo por sí mismo cada 30 s en vez de pedírselo a After Effects cada 5 s, y comprueba el proyecto abierto cada 5 s mientras cuenta (10 s en pausa) en vez de cada 2 s.
-- **Datos más seguros:** cada guardado conserva la versión anterior como `timerData.bak.json` y la carga recurre a ella si el archivo principal falta o está corrupto.
-- **La suspensión ya no cuenta como trabajo:** los huecos de más de 5 minutos se descartan, con aviso.
-- **Dos After Effects abiertos** registrando a la vez ya no se pisan el tiempo.
-- **Descarga mucho más pequeña:** la fuente de iconos incluye solo los que usa el panel (unos 7 KB en vez de 4 MB).
-
-## Novedades en v4.0.1
-- **El panel carga en macOS:** en After Effects 2022 ya no abre vacío.
-- **Los clics funcionan en macOS:** los botones, las pestañas y la lista de proyectos responden en After Effects 2022.
-
-## Novedades en v4.0.0
-- **Reconstruida desde cero** sobre una base modular React + TypeScript (compilada con Vite), reemplazando el panel de un solo archivo — más fácil de mantener y ampliar.
-- **Rebranding**: "AE TimerKeeper" ahora es **Timer Keeper**, con un nuevo ID de extensión y nombre de panel.
-- **UI monocromática "de instrumento"**: sin acentos de color — el estado se muestra mediante icono, luminancia y motion sutil (los dos puntos del display pulsan mientras corre el timer, la tecla Start/Pause se anima).
-- **Tracking real de "Hoy"**: el total diario del Dashboard ahora refleja el tiempo realmente registrado hoy (antes un placeholder hardcodeado), respaldado por un nuevo esquema de datos por día.
-- **Dashboard rediseñado**: el gráfico circular de colores fue reemplazado por una distribución de barras horizontales monocromáticas, junto con stat cards y un alternador Top 5 / Todos.
-- **Correcciones heredadas de v3**: el alternador de formato de tiempo ya no rompe el display, el menú flyout ya no ejecuta las acciones dos veces, las notificaciones toast ya no se disparan dos veces ni usan el estilo incorrecto, y el formateo de tiempo del host/panel se unificó en una sola implementación.
-- **Totalmente offline**: fuentes (Google Sans Flex) e iconos (Material Symbols) empaquetados localmente — sin peticiones a CDN.
-- **Compatibilidad actualizada:** ahora requiere After Effects 2022 (22.0) o superior.
-
 ## Instalación
 
 ### Para usuarios: instalación rápida (recomendada)
