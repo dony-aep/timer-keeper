@@ -17,6 +17,7 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 ### Corregido
 - **El formato de texto se salía del panel**: los tiempos largos como «1 hrs, 7 mins, 44 secs» se salían de la tarjeta del timer y quedaban debajo del botón de formato. Ahora el texto baja de línea entre unidades y cabe incluso con el panel en su ancho mínimo.
 - **Las listas del Dashboard se leían mal en paneles estrechos**: cuando las tarjetas de resumen se apilaban, la leyenda de la dona quedaba reducida a una fila y el gráfico de barras alargaba el Dashboard con cada proyecto registrado. Ahora las dos muestran al menos unos cinco proyectos y se desplazan dentro de su propia zona.
+- **Se perdían cambios al cerrar el panel**: si otra ventana de After Effects había escrito el archivo de datos, al cerrar o recargar el panel se fusionaba bien su tiempo y, un instante después, se guardaban encima los datos antiguos. Ahora el panel se queda con el resultado de la fusión y el tiempo de la otra ventana se conserva.
 
 ## [4.1.0] - 2026-09-16
 
