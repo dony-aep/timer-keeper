@@ -18,6 +18,7 @@ import {
   pendingTotal,
   projectTotal,
   removeProject as removeProjectFromStore,
+  removeTime,
   resetProject as resetProjectFromStore,
   setProjectColor as setProjectColorInStore,
   sanitizePath,
@@ -31,6 +32,8 @@ import { createCepFsBackend, createHostBackend, type DataBackend } from '../lib/
 import { isCepFs } from '../lib/dataFile'
 import { nextPollDelay, sameSnapshot, TRIGGER_MIN_GAP_MS } from '../lib/polling'
 import { HOST_CALL_TIMEOUT_MS, withTimeout } from '../lib/withTimeout'
+import { getCepNode, startIdleSource } from '../lib/idleSource'
+import { decideIdle, formatIdleDuration, readIdleThreshold, spanByDay, writeIdleThreshold } from '../lib/idle'
 
 /** Milliseconds between UI ticks while the timer runs. */
 const TICK_MS = 1000
@@ -38,6 +41,10 @@ const TICK_MS = 1000
 const SAVE_INTERVAL_MS = 30000
 /** Consecutive host write failures before we warn the user. */
 const SAVE_FAIL_THRESHOLD = 3
+/** Cadencia del lector de inactividad; no pasa por evalScript, así que no carga a AE. */
+const IDLE_POLL_SECONDS = 5
+/** Caídas seguidas del lector antes de dar la pausa automática por no disponible. */
+const IDLE_MAX_FAILURES = 3
 
 export type NoticeKind = 'info' | 'success' | 'warning' | 'error'
 export interface Notice {
@@ -84,6 +91,9 @@ export interface TimerContextValue {
   refresh: () => Promise<void>
   openProject: (path: string) => Promise<OpenProjectResult>
   toggleTimeFormat: () => void
+  /** Segundos sin actividad antes de pausar solo; 0 = desactivado (valor por defecto). */
+  idleThreshold: number
+  setIdleThreshold: (seconds: number) => void
 }
 
 const TimerContext = createContext<TimerContextValue | null>(null)
@@ -145,6 +155,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [convertedPending, setConvertedPendingState] =
     useState<CurrentProject | null>(readStoredConvertedPending)
   const [liveSeconds, setLiveSeconds] = useState(0)
+  const [idleThreshold, setIdleThresholdState] = useState(readIdleThreshold)
+  const [autoPausedPath, setAutoPausedPathState] = useState<string | null>(null)
+  const [idleUnavailable, setIdleUnavailable] = useState(false)
+  const [idleRestart, setIdleRestart] = useState(0)
 
   // --- Engine refs (read by intervals/listeners without stale closures) ---
   const storeRef = useRef<StoreV2>(EMPTY_STORE)
@@ -170,11 +184,22 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   // snapshot can be recognised as that project's converted copy), and its promotion.
   const pendingOpenPathRef = useRef<string | null>(null)
   const convertedPendingRef = useRef<CurrentProject | null>(convertedPending)
+  // Pausa por inactividad: proyecto a reanudar, umbral vigente, segundos acreditados desde
+  // el último arranque (tope del descuento) y caídas seguidas del lector.
+  const autoPausedPathRef = useRef<string | null>(null)
+  const idleThresholdRef = useRef(idleThreshold)
+  const creditedRunRef = useRef(0)
+  const idleFailuresRef = useRef(0)
 
   const setConvertedPending = useCallback((v: CurrentProject | null) => {
     convertedPendingRef.current = v
     setConvertedPendingState(v)
     writeStoredConvertedPending(v)
+  }, [])
+
+  const setAutoPaused = useCallback((path: string | null) => {
+    autoPausedPathRef.current = path
+    setAutoPausedPathState(path)
   }, [])
 
   const commitStore = useCallback((s: StoreV2) => {
@@ -291,6 +316,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     }
     const seconds = creditableSeconds(deltaMs)
     if (!path || !(seconds > 0)) return
+    creditedRunRef.current += seconds
     pendingRef.current = addPending(pendingRef.current, dayKey(), seconds)
     setLiveSeconds(pendingTotal(pendingRef.current))
     if (now - lastSaveRef.current >= SAVE_INTERVAL_MS) {
@@ -317,6 +343,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       const now = Date.now()
       lastTickRef.current = now
       lastSaveRef.current = now
+      creditedRunRef.current = 0
       runningRef.current = true
       setRunning(true)
     },
@@ -484,14 +511,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     const title = snap.projectName || basename(path)
     previousPathRef.current = path
     emptyPollsRef.current = 0
+    setAutoPaused(null)
     beginTiming(path, title)
     notify(`Timer started for: ${title}`, 'success')
-  }, [fetchSnapshot, notify, beginTiming])
+  }, [fetchSnapshot, notify, beginTiming, setAutoPaused])
 
   const pause = useCallback(() => {
+    setAutoPaused(null)
     if (!runningRef.current) return
     doPause(true)
-  }, [doPause])
+  }, [doPause, setAutoPaused])
 
   const resetProject = useCallback(
     (path: string) => {
@@ -537,9 +566,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     previousPathRef.current = null
     pendingOpenPathRef.current = null
     setConvertedPending(null)
+    setAutoPaused(null)
     await loadFromDisk()
     notify('Timer data refreshed successfully.', 'success')
-  }, [doPause, clearCurrent, loadFromDisk, notify, setConvertedPending])
+  }, [doPause, clearCurrent, loadFromDisk, notify, setConvertedPending, setAutoPaused])
 
   const openProject = useCallback(
     async (path: string): Promise<OpenProjectResult> => {
@@ -581,6 +611,71 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   )
 
   const toggleTimeFormat = useCallback(() => setUseDescriptiveFormat((v) => !v), [])
+
+  const setIdleThreshold = useCallback(
+    (seconds: number) => {
+      writeIdleThreshold(seconds)
+      idleThresholdRef.current = seconds
+      setIdleThresholdState(seconds)
+      idleFailuresRef.current = 0
+      setIdleUnavailable(false)
+      if (seconds <= 0) setAutoPaused(null)
+    },
+    [setAutoPaused],
+  )
+
+  /** Pausa por inactividad: descuenta el tramo sin actividad, que ya se había sumado. */
+  const idlePause = useCallback(
+    (discountSeconds: number) => {
+      const path = currentPathRef.current
+      if (!path || !runningRef.current) return
+      tick()
+      const flushed = flushPending()
+      runningRef.current = false
+      setRunning(false)
+      const next = removeTime(flushed, path, spanByDay(Date.now(), discountSeconds))
+      commitStore(next)
+      persist(next)
+      setAutoPaused(path)
+      notify(
+        `Paused: no activity for ${formatIdleDuration(discountSeconds)}. That time was not counted.`,
+        'info',
+      )
+    },
+    [tick, flushPending, commitStore, persist, setAutoPaused, notify],
+  )
+
+  /** Reanuda solo si sigue abierto y guardado el proyecto que se pausó. */
+  const idleResume = useCallback(() => {
+    const path = autoPausedPathRef.current
+    const snap = lastSnapshotRef.current
+    setAutoPaused(null)
+    if (!path || runningRef.current || !snap || snap.unsaved || snap.projectPath !== path) return
+    const title = currentTitleRef.current || snap.projectName || basename(path)
+    beginTiming(path, title)
+    notify(`Activity detected. Timer resumed for: ${title}`, 'success')
+  }, [setAutoPaused, beginTiming, notify])
+
+  const handleIdleReading = useCallback(
+    (idleSeconds: number) => {
+      const decision = decideIdle({
+        idleSeconds,
+        thresholdSeconds: idleThresholdRef.current,
+        running: runningRef.current,
+        currentPath: currentPathRef.current,
+        autoPausedPath: autoPausedPathRef.current,
+        runSeconds: creditedRunRef.current,
+      })
+      if (decision.type === 'pause') idlePause(decision.discountSeconds)
+      else if (decision.type === 'resume') idleResume()
+      else if (decision.type === 'forget') setAutoPaused(null)
+    },
+    [idlePause, idleResume, setAutoPaused],
+  )
+  const idleHandlerRef = useRef(handleIdleReading)
+  useEffect(() => {
+    idleHandlerRef.current = handleIdleReading
+  }, [handleIdleReading])
 
   // --- Effects ---
 
@@ -637,6 +732,48 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', onVisible)
     }
   }, [pollSnapshot])
+
+  // El lector de inactividad solo corre si la función está activada y hay algo que vigilar:
+  // el timer en marcha o una pausa automática pendiente de reanudar. Desactivada, no se
+  // lanza ningún proceso.
+  const idleActive =
+    cep.isCEP && idleThreshold > 0 && !idleUnavailable && (running || autoPausedPath !== null)
+  useEffect(() => {
+    if (!idleActive) return
+    let restartTimer = 0
+    const node = getCepNode()
+    const source = node
+      ? startIdleSource(node, IDLE_POLL_SECONDS, (seconds) => {
+          if (seconds === null) {
+            idleFailuresRef.current += 1
+            if (idleFailuresRef.current >= IDLE_MAX_FAILURES) {
+              setIdleUnavailable(true)
+              notify('Auto-pause is unavailable: the panel could not read system activity.', 'warning')
+            } else {
+              restartTimer = window.setTimeout(() => setIdleRestart((n) => n + 1), 5000)
+            }
+            return
+          }
+          idleFailuresRef.current = 0
+          // Permite comprobar la lectura desde el depurador remoto.
+          const debugWindow = window as Window & { __tkIdle?: unknown }
+          debugWindow.__tkIdle = { seconds, at: Date.now() }
+          idleHandlerRef.current(seconds)
+        })
+      : null
+    if (!source) {
+      setIdleUnavailable(true)
+      notify('Auto-pause is unavailable on this computer.', 'warning')
+      return
+    }
+    const stop = () => source.stop()
+    window.addEventListener('beforeunload', stop)
+    return () => {
+      window.clearTimeout(restartTimer)
+      window.removeEventListener('beforeunload', stop)
+      stop()
+    }
+  }, [idleActive, idleRestart, notify])
 
   // Persistent 1s UI tick, gated by running.
   useEffect(() => {
@@ -701,6 +838,8 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       refresh,
       openProject,
       toggleTimeFormat,
+      idleThreshold,
+      setIdleThreshold,
     }),
     [
       store,
@@ -719,6 +858,8 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       refresh,
       openProject,
       toggleTimeFormat,
+      idleThreshold,
+      setIdleThreshold,
     ],
   )
 

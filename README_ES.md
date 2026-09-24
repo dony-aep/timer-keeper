@@ -106,6 +106,7 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
 - **Detección automática de proyecto:** pausa el proyecto anterior y auto-inicia el recién abierto si ya tiene tiempo registrado; pausa preventiva para proyectos sin guardar o en conversión de versión.
 - **Lista de proyectos:** búsqueda por nombre, doble clic para abrir un proyecto (e iniciar su cronometraje), eliminar un proyecto y sus datos, actualizar desde disco.
 - **Reiniciar:** borra el tiempo acumulado del proyecto seleccionado (con confirmación).
+- **Pausa automática por inactividad:** opcional y desactivada por defecto. Pausa el timer tras 5 a 30 minutos sin teclado ni ratón, descuenta ese tiempo y reanuda cuando vuelves al mismo proyecto.
 - **Alternador de formato de tiempo:** cambia entre `HH:MM:SS` y un formato de duración descriptivo.
 - **Dashboard:** tiempo total registrado, tiempo de hoy (real, por día calendario), número de proyectos, y una distribución en dona o en barras horizontales con alternador Top 5 / Todos. Cada proyecto puede tener su propio color.
 - **Modal de ayuda:** guía de uso, atajo "Abrir Ubicación de Datos", y enlace de contacto/documentación.
@@ -126,7 +127,7 @@ Tras `npm run deploy`, reinicia After Effects para cargar el panel actualizado.
    - Alterna entre **Top 5** y **Todos** los proyectos en la vista de distribución.
    - Haz clic en el cuadradito de un proyecto en la leyenda de la dona para elegir su color, o en **Automatic** para volver al gris.
 5. **Ayuda:** haz clic en el icono de ayuda en el pie para ver una guía de uso, acceso rápido a la carpeta de tu archivo de datos, y enlaces de soporte/documentación.
-6. **Menú flyout:** abre el menú del panel (arriba a la derecha) para actualizar la lista de proyectos o abrir la documentación en línea.
+6. **Menú flyout:** abre el menú del panel (arriba a la derecha) para actualizar la lista de proyectos, activar **Auto-pause when idle** o abrir la documentación en línea.
 
 ## Datos
 Los datos del temporizador se guardan como JSON en `Documents/Adobe/TimerData/timerData.json`, escrito por el panel a través de un archivo temporal, conservando la versión anterior como `timerData.bak.json`. Los formatos antiguos de versiones anteriores se detectan y migran automáticamente la primera vez que abres la extensión, con una copia de respaldo escrita antes de la migración.

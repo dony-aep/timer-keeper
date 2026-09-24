@@ -231,6 +231,31 @@ export function resetProject(store: StoreV2, path: string): StoreV2 {
   return { version: 2, projects }
 }
 
+/**
+ * Descuenta segundos ya acreditados, por día (lo usa la pausa por inactividad). Solo resta
+ * lo que ese día tenía, así que el total nunca baja más de lo que se quitó de verdad.
+ */
+export function removeTime(store: StoreV2, path: string, perDay: Record<string, number>): StoreV2 {
+  const idx = store.projects.findIndex((p) => p.path === path)
+  if (idx < 0) return store
+  const entry = store.projects[idx]
+  const daily = { ...entry.daily }
+  let removed = 0
+  for (const [day, seconds] of Object.entries(perDay)) {
+    const had = daily[day] ?? 0
+    const take = Math.min(had, Math.max(0, seconds))
+    if (take <= 0) continue
+    removed += take
+    const left = roundMs(had - take)
+    if (left > 0) daily[day] = left
+    else delete daily[day]
+  }
+  if (removed === 0) return store
+  const projects = store.projects.slice()
+  projects[idx] = { ...entry, daily, totalSeconds: Math.max(0, roundMs(entry.totalSeconds - removed)) }
+  return { version: 2, projects }
+}
+
 /** Set a project's color ("#rrggbb"), or clear it with null. Invalid colors are ignored. */
 export function setProjectColor(store: StoreV2, path: string, color: string | null): StoreV2 {
   const idx = store.projects.findIndex((p) => p.path === path)

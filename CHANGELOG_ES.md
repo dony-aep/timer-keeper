@@ -8,6 +8,7 @@ y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/
 ## [Unreleased]
 
 ### Añadido
+- **Pausa automática por inactividad**: si te alejas del ordenador con el timer en marcha, ahora puede pausarse solo tras 5, 10, 15 o 30 minutos sin teclado ni ratón, descontar ese tiempo del proyecto y reanudarse cuando vuelves al mismo proyecto. El plazo se elige en el menú del panel, en **Auto-pause when idle**; viene desactivada. Una pausa manual nunca se reanuda sola.
 - **Colores por proyecto**: en el Dashboard, haz clic en el cuadradito de un proyecto en la leyenda de la dona para darle un color, entre diez predefinidos o cualquiera con el selector (área de color, barra de tono y campo hex). El color se ve en la dona y en las barras y se guarda con tus datos; **Automatic** vuelve al gris por defecto.
 
 ### Corregido

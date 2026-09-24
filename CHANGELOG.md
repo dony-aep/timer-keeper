@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Auto-pause when idle**: if you leave the computer with the timer running, it can now pause itself after 5, 10, 15 or 30 minutes without keyboard or mouse activity, remove that idle time from the project, and resume when you come back to the same project. Choose the delay in the panel menu under **Auto-pause when idle**; it is off by default. A manual pause never resumes on its own.
 - **Project colors**: in the Dashboard, click a project's swatch in the donut legend to give it a color, from ten presets or any color with the picker (color area, hue slider and hex field). The color shows in the donut and bar charts and is saved with your data; **Automatic** goes back to the default grey.
 
 ### Fixed

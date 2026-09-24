@@ -21,6 +21,10 @@
                 <Resources>
                     <MainPath>./index.html</MainPath>
                     <ScriptPath>./jsx/hostscript.jsx</ScriptPath>
+                    <CEFCommandLine>
+                        <!-- Node solo lee el tiempo sin actividad del sistema (src/lib/idleSource.ts). -->
+                        <Parameter>--enable-nodejs</Parameter>
+                    </CEFCommandLine>
                 </Resources>
                 <Lifecycle>
                     <AutoVisible>true</AutoVisible>
