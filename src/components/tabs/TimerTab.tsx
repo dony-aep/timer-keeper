@@ -13,7 +13,7 @@ import styles from './TimerTab.module.css'
 /**
  * HH:MM:SS split into standalone digit groups + colon spans so the colons
  * (and only the colons) can dim every other second while the timer runs. Descriptive
- * format has no fixed shape, so it renders as plain tabular text instead.
+ * format has no fixed shape, so it renders as unit blocks that wrap instead.
  */
 function TimeReadout({
   seconds,
@@ -26,7 +26,18 @@ function TimeReadout({
 }) {
   const timeClass = running ? `${styles.time} ${styles.timeLive}` : styles.time
   if (descriptive) {
-    return <span className={timeClass}>{formatDescriptive(seconds)}</span>
+    // Una unidad por bloque: con muchas horas el texto baja de línea entre unidades en vez
+    // de salirse de la tarjeta.
+    const parts = formatDescriptive(seconds).split(', ')
+    return (
+      <span className={`${timeClass} ${styles.timeDescriptive}`}>
+        {parts.map((part, i) => (
+          <span key={i} className={styles.unit}>
+            {i < parts.length - 1 ? `${part},` : part}
+          </span>
+        ))}
+      </span>
+    )
   }
   const [h, m, s] = formatTime(seconds).split(':')
   // Atenuados en los segundos impares: una transición por segundo en vez de una animación

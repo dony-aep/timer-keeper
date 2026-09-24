@@ -5,6 +5,11 @@ All notable changes to Timer Keeper will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Text time format running off the panel**: long times such as "1 hrs, 7 mins, 44 secs" spilled past the edges of the timer card and under the format button. The text now wraps between units and fits even at the narrowest panel width.
+
 ## [4.1.0] - 2026-09-16
 
 ### Changed
