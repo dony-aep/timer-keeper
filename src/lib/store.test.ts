@@ -11,6 +11,7 @@ import {
   todaySeconds,
   projectTotal,
   basename,
+  decodeFileName,
   addPending,
   applyPending,
   pendingTotal,
@@ -57,6 +58,38 @@ describe('parseStore - v2 passthrough', () => {
     })
     const { store } = parseStore(raw)
     expect(store.projects[0].title).toBe('My Comp.aep')
+  })
+
+  it('repairs a title saved URI-encoded by earlier versions', () => {
+    const raw = JSON.stringify({
+      version: 2,
+      projects: [
+        { path: 'C:\\p\\Animación final.aep', title: 'Animaci%C3%B3n final.aep', totalSeconds: 13, daily: {} },
+      ],
+    })
+    expect(parseStore(raw).store.projects[0].title).toBe('Animación final.aep')
+  })
+
+  it('leaves a title alone when decoding it does not give the file name', () => {
+    const raw = JSON.stringify({
+      version: 2,
+      projects: [
+        { path: 'C:\\p\\Promo.aep', title: 'Promo 50%25.aep', totalSeconds: 1, daily: {} },
+        { path: 'C:\\p\\Sale.aep', title: 'Sale 50% off', totalSeconds: 1, daily: {} },
+      ],
+    })
+    const titles = parseStore(raw).store.projects.map((p) => p.title)
+    expect(titles).toEqual(['Promo 50%25.aep', 'Sale 50% off'])
+  })
+})
+
+describe('decodeFileName', () => {
+  it('decodes the URI-encoded name ExtendScript reports', () => {
+    expect(decodeFileName('Animaci%C3%B3n%20final.aep')).toBe('Animación final.aep')
+  })
+
+  it('returns the name unchanged when it is not valid URI encoding', () => {
+    expect(decodeFileName('50% off.aep')).toBe('50% off.aep')
   })
 })
 

@@ -14,6 +14,7 @@ import {
   addPending,
   applyPending,
   basename,
+  decodeFileName,
   parseStore,
   rebaseOnMerged,
   pendingTotal,
@@ -438,7 +439,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       const obj = JSON.parse(raw) as Partial<HostSnapshot>
       return {
         projectPath: obj.projectPath ? sanitizePath(obj.projectPath) : null,
-        projectName: obj.projectName ? sanitizePath(obj.projectName) : null,
+        projectName: obj.projectName ? decodeFileName(obj.projectName) : null,
         unsaved: !!obj.unsaved,
         converting: !!obj.converting,
       }

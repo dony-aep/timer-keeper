@@ -5,6 +5,11 @@ All notable changes to Timer Keeper will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Project names with accents**: a project such as "Animación final.aep" showed up as "Animaci%C3%B3n final.aep" on the timer and in the project list. Names now show as they are on disk, and names already saved this way are corrected the next time the panel opens.
+
 ## [4.2.0] - 2026-09-23
 
 ### Added

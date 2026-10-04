@@ -22,6 +22,18 @@ export function sanitizePath(path: string): string {
   return typeof path === 'string' ? path.replace(/%20/g, ' ') : ''
 }
 
+/**
+ * `File.name` en ExtendScript llega codificado como URI («Animaci%C3%B3n.aep»). Un `%`
+ * que no forma una secuencia válida deja el nombre tal cual.
+ */
+export function decodeFileName(name: string): string {
+  try {
+    return decodeURIComponent(name)
+  } catch {
+    return name
+  }
+}
+
 /** Extract the final path segment (file name) from a path using either separator. */
 export function basename(path: string): string {
   const clean = sanitizePath(path)
@@ -72,7 +84,11 @@ function sanitizeV2(projectsRaw: unknown[]): StoreV2 {
     const p = item as Record<string, unknown>
     if (typeof p.path !== 'string' || p.path.trim() === '') continue
     const path = p.path
-    const title = typeof p.title === 'string' && p.title.trim() !== '' ? p.title : basename(path)
+    let title = typeof p.title === 'string' && p.title.trim() !== '' ? p.title : basename(path)
+    // Hasta la 4.2.0 el título se guardaba codificado. Solo se repara si decodificado da el
+    // nombre del archivo: así no se toca un título que lleve un % de verdad.
+    const decoded = decodeFileName(title)
+    if (decoded !== title && decoded === basename(path)) title = decoded
     const entry: ProjectEntry = {
       path,
       title,
