@@ -2,7 +2,7 @@
 
 [![English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Español](https://img.shields.io/badge/Idioma-Español-red.svg)](README_ES.md)
-[![Versión](https://img.shields.io/badge/versión-4.2.1-white.svg)](CHANGELOG_ES.md)
+[![Versión](https://img.shields.io/badge/versión-4.2.2-white.svg)](CHANGELOG_ES.md)
 [![After Effects](https://img.shields.io/badge/After%20Effects-2022%2B-9999ff.svg)](#compatibilidad)
 [![CEP](https://img.shields.io/badge/CEP-11-555.svg)](#compatibilidad)
 [![Stack](https://img.shields.io/badge/React%2019%20·%20TypeScript%20·%20Vite-1e1e1e.svg)](#stack-tecnológico)
@@ -16,10 +16,10 @@ Timer Keeper es una extensión para Adobe After Effects que rastrea el tiempo qu
 Antes distribuida como "AE TimerKeeper", la extensión fue reconstruida desde cero como **Timer Keeper**.
 
 ## Versión Actual
-**v4.2.1** - Los nombres de proyecto con tildes se ven bien. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
+**v4.2.2** - El texto y los iconos se ven bien con el panel instalado para todos los usuarios. Ver [CHANGELOG_ES.md](CHANGELOG_ES.md).
 
-## Novedades en v4.2.1
-- **Corregido:** un proyecto como «Animación final.aep» aparecía como «Animaci%C3%B3n final.aep» en el timer y en la lista de proyectos. Los nombres que ya se habían guardado así se corrigen la próxima vez que se abre el panel.
+## Novedades en v4.2.2
+- **Corregido:** instalado para todos los usuarios, en `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions` (donde lo puede poner el ZXP Installer de aescripts), el panel no cargaba ninguna de sus fuentes: el texto salía en serif y cada icono mostraba su nombre, como `play_arrow`.
 
 ## Instalación
 

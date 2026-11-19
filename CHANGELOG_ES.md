@@ -5,7 +5,7 @@ Todos los cambios notables de Timer Keeper se documentan en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/spec/v2.0.0.html).
 
-## [Sin publicar]
+## [4.2.2] - 2026-11-19
 
 ### Corregido
 - **Letra serif y nombres de iconos con la instalación para todos los usuarios**: instalado en `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions`, donde lo pone el ZXP Installer de aescripts, el panel no cargaba ninguna de sus fuentes. El texto salía en serif y cada icono mostraba su nombre, como `play_arrow`. El código armaba la URL de cada fuente al abrir el panel, y los paréntesis de esa ruta la invalidaban. Ahora los estilos van en su propio `style.css`, con URL relativas.
