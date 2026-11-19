@@ -57,8 +57,13 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     // Same reason as cepClassicScriptTags: no module graph in the browser, so no
-    // modulepreload links and a single self-contained bundle.
+    // modulepreload links and a single JS bundle.
     modulePreload: false,
+    // With format iife, Vite inlines the CSS into the JS and rebuilds each font URL at
+    // runtime inside an unquoted url(). An install path with parentheses, such as
+    // C:\Program Files (x86)\Common Files\Adobe\CEP\extensions, makes that url() invalid
+    // and no font loads. A separate style.css keeps the URLs relative.
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
         format: 'iife',
